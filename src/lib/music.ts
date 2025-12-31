@@ -115,8 +115,10 @@ export function parseRoot(root: string): SpelledNote {
 
     let acc: Acc = 0;
     const rest = trimmed.slice(1);
-    if (rest === "b" || rest === "♭") acc = -1;
-    if (rest === "#" || rest === "♯") acc = 1;
+    if (rest === "") acc = 0;
+    else if (rest === "b" || rest === "♭") acc = -1;
+    else if (rest === "#" || rest === "♯") acc = 1;
+    else throw new Error(`Bad root: ${root}`);
 
     const pc = mod12(LETTER_TO_PC[letter] + acc);
     return { letter, acc, pc, text: formatNoteText(letter, acc) };
@@ -137,17 +139,39 @@ function diatonicLetterFrom(rootLetter: Letter, degreeNumber: number): Letter {
 // Prefer diatonic letter if possible with acc -1/0/+1.
 // If not possible (would require double accidental), "respell where needed":
 // pick any single-accidental spelling matching pc, preferring naturals, then sharps, then flats.
-function spellPitchClassPrefer(letter: Letter, targetPc: number): SpelledNote {
-    const base = LETTER_TO_PC[letter];
+function diatonicDistance(a: Letter, b: Letter): number {
+    const ia = LETTERS.indexOf(a);
+    const ib = LETTERS.indexOf(b);
+    if (ia < 0 || ib < 0) return 7;
+    const d = Math.abs(ia - ib);
+    return Math.min(d, 7 - d);
+}
+
+function scoreCandidateRelative(expected: Letter, rootAcc: Acc, n: SpelledNote): number {
+    // lower = better
+    // 1) stay as close as possible to the expected diatonic letter
+    // 2) prefer naturals, then whichever accidental matches the key flavor (sharp vs flat), then the opposite
+    const letterPenalty = diatonicDistance(expected, n.letter) * 10;
+
+    if (n.acc === 0) return letterPenalty + 0;
+
+    // Key-flavor preference: sharp keys prefer sharps, flat keys prefer flats, naturals slightly prefer sharps (common readability)
+    const prefer: Acc = rootAcc === -1 ? -1 : 1;
+    const accidentalPenalty = n.acc === prefer ? 1 : 2;
+    return letterPenalty + accidentalPenalty;
+}
+
+function spellPitchClassPrefer(expectedLetter: Letter, targetPc: number, rootAcc: Acc): SpelledNote {
+    const base = LETTER_TO_PC[expectedLetter];
 
     for (const acc of [0, 1, -1] as Acc[]) {
         if (mod12(base + acc) === targetPc) {
-            return { letter, acc, pc: targetPc, text: formatNoteText(letter, acc) };
+            return { letter: expectedLetter, acc, pc: targetPc, text: formatNoteText(expectedLetter, acc) };
         }
     }
 
     // fallback: choose any letter+acc (single accidental) that matches targetPc
-    // prefer naturals then sharps then flats (arbitrary but stable)
+    // prefer diatonic closeness, then naturals, then "key-flavor" accidentals (sharp/flat).
     const candidates: SpelledNote[] = [];
     for (const L of LETTERS) {
         const b = LETTER_TO_PC[L];
@@ -157,16 +181,8 @@ function spellPitchClassPrefer(letter: Letter, targetPc: number): SpelledNote {
             }
         }
     }
-    candidates.sort((x, y) => scoreCandidate(x) - scoreCandidate(y));
-    return candidates[0] ?? { letter, acc: 0, pc: targetPc, text: formatNoteText(letter, 0) };
-}
-
-function scoreCandidate(n: SpelledNote): number {
-    // lower = better
-    // natural best, then sharp, then flat (you can flip sharp/flat if you prefer)
-    if (n.acc === 0) return 0;
-    if (n.acc === 1) return 1;
-    return 2;
+    candidates.sort((x, y) => scoreCandidateRelative(expectedLetter, rootAcc, x) - scoreCandidateRelative(expectedLetter, rootAcc, y));
+    return candidates[0] ?? { letter: expectedLetter, acc: 0, pc: targetPc, text: formatNoteText(expectedLetter, 0) };
 }
 
 export type SpelledScale = {
@@ -186,7 +202,7 @@ export function spellScale(rootText: string, scale: ScaleDef): SpelledScale {
     scale.degrees.forEach((deg, i) => {
         const targetPc = mod12(root.pc + scale.semitones[i]);
         const expectedLetter = diatonicLetterFrom(root.letter, deg.number);
-        const spelled = spellPitchClassPrefer(expectedLetter, targetPc);
+        const spelled = spellPitchClassPrefer(expectedLetter, targetPc, root.acc);
         degrees.push({ degree: deg, note: spelled });
 
         // If collisions ever happen in later exotic scales, keep first (stable).
