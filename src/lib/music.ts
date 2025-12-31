@@ -197,6 +197,19 @@ export const SCALES: ScaleDef[] = [
         semitones: [0, 1, 3, 4, 6, 8, 10],
     },
     {
+        id: "whole_tone",
+        name: "Whole tone",
+        degrees: [
+            { number: 1, alt: 0 },
+            { number: 2, alt: 0 },
+            { number: 3, alt: 0 },
+            { number: 4, alt: 1 }, // ♯4
+            { number: 5, alt: 1 }, // ♯5
+            { number: 7, alt: -1 }, // ♭7
+        ],
+        semitones: [0, 2, 4, 6, 8, 10],
+    },
+    {
         id: "major",
         name: "Major",
         degrees: [
