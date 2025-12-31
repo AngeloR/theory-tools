@@ -131,7 +131,12 @@ function buildDiatonicChords(spelled: SpelledScale, kind: "triad" | "7th"): Diat
 
 export function DegreeMap({ spelled }: { spelled: SpelledScale }) {
   const formula = spelled.scale.degrees.map(formatDegree).join("  ");
-  const showDiatonicChords = spelled.scale.degrees.length === 7;
+  const isDiatonic7 =
+    spelled.scale.degrees.length === 7 &&
+    spelled.scale.degrees.every((d) => Number.isInteger(d.number) && d.number >= 1 && d.number <= 7) &&
+    new Set(spelled.scale.degrees.map((d) => d.number)).size === 7;
+
+  const showDiatonicChords = isDiatonic7;
   const triads = showDiatonicChords ? buildDiatonicChords(spelled, "triad") : [];
   const sevenths = showDiatonicChords ? buildDiatonicChords(spelled, "7th") : [];
 
