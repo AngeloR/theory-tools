@@ -5,6 +5,16 @@
   --text: #e9ecf3;
   --muted: #aab2c5;
   --grid: rgba(255, 255, 255, 0.08);
+
+  /* Layout + sizing tokens (tuned for desktop; overridden on mobile) */
+  --page-pad-x: 16px;
+  --page-pad-y: 14px;
+  --panel-pad: 12px;
+
+  --string-label-w: 44px;
+  --fret-w: 38px;
+  --fret-h: 38px;
+  --fret-gap: 6px;
 }
 
 * {
@@ -30,7 +40,7 @@ body {
   flex-direction: column;
 }
 .header {
-  padding: 16px 16px 10px;
+  padding: 16px var(--page-pad-x) 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
 }
@@ -55,6 +65,7 @@ body {
 .control {
   display: grid;
   gap: 6px;
+  flex: 1 1 220px;
 }
 .controlLabel {
   font-size: 12px;
@@ -70,7 +81,7 @@ select {
 }
 
 .main {
-  padding: 14px 16px 20px;
+  padding: var(--page-pad-y) var(--page-pad-x) 20px;
   display: grid;
   gap: 14px;
 }
@@ -79,7 +90,7 @@ select {
   background: var(--panel2);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
-  padding: 12px;
+  padding: var(--panel-pad);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 .panelHeader {
@@ -211,12 +222,12 @@ select {
   padding-bottom: 6px;
 }
 .fretboard {
-  min-width: 980px;
+  width: max-content;
 } /* ensures scroll on mobile */
 .fretHeader {
   display: grid;
-  grid-template-columns: 44px repeat(24, 38px);
-  gap: 6px;
+  grid-template-columns: var(--string-label-w) repeat(24, var(--fret-w));
+  gap: var(--fret-gap);
   align-items: center;
   margin-bottom: 8px;
 }
@@ -241,8 +252,8 @@ select {
 
 .stringRow {
   display: grid;
-  grid-template-columns: 44px repeat(24, 38px);
-  gap: 6px;
+  grid-template-columns: var(--string-label-w) repeat(24, var(--fret-w));
+  gap: var(--fret-gap);
   align-items: center;
   margin: 6px 0;
 }
@@ -253,7 +264,7 @@ select {
 }
 
 .fretCell {
-  height: 38px;
+  height: var(--fret-h);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.02);
@@ -271,6 +282,42 @@ select {
 }
 .noteText {
   font-size: 12px;
+}
+
+/* Mobile optimization */
+@media (max-width: 560px) {
+  :root {
+    --page-pad-x: 12px;
+    --page-pad-y: 12px;
+    --panel-pad: 10px;
+
+    --string-label-w: 34px;
+    --fret-w: 32px;
+    --fret-h: 32px;
+    --fret-gap: 5px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+  .subtitle,
+  .panelSubtitle {
+    font-size: 12px;
+  }
+
+  .controls {
+    gap: 10px;
+  }
+  .control {
+    flex: 1 1 100%;
+  }
+  select {
+    width: 100%;
+  }
+
+  .noteText {
+    font-size: 11px;
+  }
 }
 
 /* Degree color tokens (consistent across keys/scales)
