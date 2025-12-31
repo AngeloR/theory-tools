@@ -127,6 +127,20 @@ export const SCALES: ScaleDef[] = [
         semitones: [0, 2, 4, 5, 7, 9, 10],
     },
     {
+        id: "locrian",
+        name: "Locrian",
+        degrees: [
+            { number: 1, alt: 0 },
+            { number: 2, alt: -1 },
+            { number: 3, alt: -1 },
+            { number: 4, alt: 0 },
+            { number: 5, alt: -1 },
+            { number: 6, alt: -1 },
+            { number: 7, alt: -1 },
+        ],
+        semitones: [0, 1, 3, 5, 6, 8, 10],
+    },
+    {
         id: "major",
         name: "Major",
         degrees: [
