@@ -155,6 +155,20 @@ export const SCALES: ScaleDef[] = [
         semitones: [0, 1, 3, 5, 7, 9, 10],
     },
     {
+        id: "lydian_augmented",
+        name: "Lydian augmented",
+        degrees: [
+            { number: 1, alt: 0 },
+            { number: 2, alt: 0 },
+            { number: 3, alt: 0 },
+            { number: 4, alt: 1 }, // ♯4
+            { number: 5, alt: 1 }, // ♯5
+            { number: 6, alt: 0 },
+            { number: 7, alt: 0 },
+        ],
+        semitones: [0, 2, 4, 6, 8, 9, 11],
+    },
+    {
         id: "major",
         name: "Major",
         degrees: [
