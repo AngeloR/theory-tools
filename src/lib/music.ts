@@ -46,6 +46,18 @@ export const SCALES: ScaleDef[] = [
         semitones: [0, 2, 4, 7, 9],
     },
     {
+        id: "minor_pentatonic",
+        name: "Minor Pentatonic",
+        degrees: [
+            { number: 1, alt: 0 },
+            { number: 3, alt: -1 },
+            { number: 4, alt: 0 },
+            { number: 5, alt: 0 },
+            { number: 7, alt: -1 },
+        ],
+        semitones: [0, 3, 5, 7, 10],
+    },
+    {
         id: "major",
         name: "Major",
         degrees: [
