@@ -34,6 +34,18 @@ const LETTERS: Letter[] = ["C", "D", "E", "F", "G", "A", "B"];
 
 export const SCALES: ScaleDef[] = [
     {
+        id: "major_pentatonic",
+        name: "Major Pentatonic",
+        degrees: [
+            { number: 1, alt: 0 },
+            { number: 2, alt: 0 },
+            { number: 3, alt: 0 },
+            { number: 5, alt: 0 },
+            { number: 6, alt: 0 },
+        ],
+        semitones: [0, 2, 4, 7, 9],
+    },
+    {
         id: "major",
         name: "Major",
         degrees: [

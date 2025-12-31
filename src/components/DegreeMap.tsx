@@ -131,8 +131,9 @@ function buildDiatonicChords(spelled: SpelledScale, kind: "triad" | "7th"): Diat
 
 export function DegreeMap({ spelled }: { spelled: SpelledScale }) {
   const formula = spelled.scale.degrees.map(formatDegree).join("  ");
-  const triads = buildDiatonicChords(spelled, "triad");
-  const sevenths = buildDiatonicChords(spelled, "7th");
+  const showDiatonicChords = spelled.scale.degrees.length === 7;
+  const triads = showDiatonicChords ? buildDiatonicChords(spelled, "triad") : [];
+  const sevenths = showDiatonicChords ? buildDiatonicChords(spelled, "7th") : [];
 
   return (
     <section className="panel">
@@ -164,59 +165,63 @@ export function DegreeMap({ spelled }: { spelled: SpelledScale }) {
         })}
       </div>
 
-      <div className="chordSection">
-        <div className="chordSectionTitle">Diatonic chords (triads)</div>
-        <div className="chordStrip" role="list" aria-label="Diatonic triads">
-          {triads.map((c) => {
-            const isRoot = c.degreeIndex === 0;
-            return (
-              <div
-                key={`triad-${c.degreeIndex}-${c.chordText}`}
-                role="listitem"
-                className={[
-                  "chordPill",
-                  `degree-${spelled.scale.degrees[c.degreeIndex]?.number}`,
-                  isRoot ? "isRoot" : "",
-                ].join(" ")}
-                title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
-              >
-                <div className="chordPillTop mono">
-                  {c.roman ? `${c.roman} · ` : ""}
-                  {c.degreeText}
-                </div>
-                <div className="chordPillMain">{c.chordText}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {showDiatonicChords && (
+        <>
+          <div className="chordSection">
+            <div className="chordSectionTitle">Diatonic chords (triads)</div>
+            <div className="chordStrip" role="list" aria-label="Diatonic triads">
+              {triads.map((c) => {
+                const isRoot = c.degreeIndex === 0;
+                return (
+                  <div
+                    key={`triad-${c.degreeIndex}-${c.chordText}`}
+                    role="listitem"
+                    className={[
+                      "chordPill",
+                      `degree-${spelled.scale.degrees[c.degreeIndex]?.number}`,
+                      isRoot ? "isRoot" : "",
+                    ].join(" ")}
+                    title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
+                  >
+                    <div className="chordPillTop mono">
+                      {c.roman ? `${c.roman} · ` : ""}
+                      {c.degreeText}
+                    </div>
+                    <div className="chordPillMain">{c.chordText}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-      <div className="chordSection">
-        <div className="chordSectionTitle">Diatonic chords (7ths)</div>
-        <div className="chordStrip" role="list" aria-label="Diatonic seventh chords">
-          {sevenths.map((c) => {
-            const isRoot = c.degreeIndex === 0;
-            return (
-              <div
-                key={`7th-${c.degreeIndex}-${c.chordText}`}
-                role="listitem"
-                className={[
-                  "chordPill",
-                  `degree-${spelled.scale.degrees[c.degreeIndex]?.number}`,
-                  isRoot ? "isRoot" : "",
-                ].join(" ")}
-                title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
-              >
-                <div className="chordPillTop mono">
-                  {c.roman ? `${c.roman} · ` : ""}
-                  {c.degreeText}
-                </div>
-                <div className="chordPillMain">{c.chordText}</div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+          <div className="chordSection">
+            <div className="chordSectionTitle">Diatonic chords (7ths)</div>
+            <div className="chordStrip" role="list" aria-label="Diatonic seventh chords">
+              {sevenths.map((c) => {
+                const isRoot = c.degreeIndex === 0;
+                return (
+                  <div
+                    key={`7th-${c.degreeIndex}-${c.chordText}`}
+                    role="listitem"
+                    className={[
+                      "chordPill",
+                      `degree-${spelled.scale.degrees[c.degreeIndex]?.number}`,
+                      isRoot ? "isRoot" : "",
+                    ].join(" ")}
+                    title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
+                  >
+                    <div className="chordPillTop mono">
+                      {c.roman ? `${c.roman} · ` : ""}
+                      {c.degreeText}
+                    </div>
+                    <div className="chordPillMain">{c.chordText}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       <details className="teacherHintDetails">
         <summary>Teacher hint</summary>
