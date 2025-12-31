@@ -94,6 +94,81 @@ select {
   font-size: 13px;
 }
 
+.degreeStrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+.degreePill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.degreePillDegree {
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+.degreePillNote {
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.teacherHintDetails {
+  margin-top: 10px;
+}
+.teacherHintDetails summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  user-select: none;
+}
+
+.chordSection {
+  margin-top: 10px;
+}
+.chordSectionTitle {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.chordStrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+.chordPill {
+  flex: 0 0 auto;
+  min-width: 140px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.chordPillTop {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.chordPillMain {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .degreeGrid {
   display: grid;
   grid-template-columns: 120px 1fr;
