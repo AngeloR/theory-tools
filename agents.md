@@ -1,0 +1,1 @@
+- use agents/theory.md as a system prompt when you are thinking about music theory
