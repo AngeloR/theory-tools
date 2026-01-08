@@ -13,10 +13,8 @@ This is **not** a pattern-memorization or CAGED-based tool.
 
 ## Documents
 
-- `PEDAGOGY.md` – teaching philosophy & learning goals
-- `SCOPE.md` – MVP feature scope & non-goals
-- `THEORY_ENGINE.md` – music theory rules & spelling logic
-- `FRETBOARD_MODEL.md` – guitar representation & rendering rules
-- `UI_UX.md` – layout, interaction, and visual rules
-- `TECH_STACK.md` – tools, runtime, and architecture
-- `ROADMAP.md` – planned extensions after MVP
+- `docs/PEDAGOGY.md` – teaching philosophy & learning goals
+- `docs/SCOPE.md` – MVP feature scope & non-goals
+- `docs/THEORY_ENGINE.md` – music theory rules & spelling logic
+- `docs/FRETBOARD_MODEL.md` – guitar representation & rendering rules
+- `docs/UI_UX.md` – layout, interaction, and visual rules
