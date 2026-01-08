@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import "./css/styles.css";
 import { SCALES, spellScale, type ScaleDef } from "./lib/music";
 import { Controls } from "./components/Controls";
-import { DegreeMap } from "./components/DegreeMap";
 import { CircleOfFifthsTool } from "./components/CircleOfFifthsTool";
 import { Fretboard } from "./components/Fretboard";
+import type { ChordFocus } from "./lib/harmony";
 
 const STANDARD_TUNING = ["E", "B", "G", "D", "A", "E"] as const;
 const THEME_STORAGE_KEY = "guitar-theme";
@@ -68,6 +68,7 @@ export default function App() {
     }
     return [...STANDARD_TUNING];
   });
+  const [chordFocus, setChordFocus] = useState<ChordFocus | null>(null);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "light";
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -123,24 +124,7 @@ export default function App() {
       </header>
 
       <main className="main">
-        <section className="panel controlsPanel">
-          <div className="panelHeader">
-            <div className="panelTitle">Key + Scale</div>
-            <div className="panelSubtitle">
-              Drives the degree map and the fretboard.
-            </div>
-          </div>
-          <Controls
-            roots={ROOTS}
-            scales={SCALES}
-            root={root}
-            scaleId={scaleId}
-            onRootChange={setRoot}
-            onScaleChange={setScaleId}
-          />
-        </section>
-        <DegreeMap spelled={spelled} />
-        <CircleOfFifthsTool />
+        <CircleOfFifthsTool chordFocus={chordFocus} onChordFocus={setChordFocus} />
         <Fretboard
           spelled={spelled}
           tuning={tuning}
@@ -148,6 +132,26 @@ export default function App() {
             setTuning((prev) => prev.map((note, i) => (i === index ? value : note)))
           }
           onResetTuning={() => setTuning([...STANDARD_TUNING])}
+          chordFocus={chordFocus}
+          onClearChordFocus={() => setChordFocus(null)}
+          keyScaleSection={
+            <>
+              <div className="fretboardKeyScaleHeader">
+                <div className="panelTitle">Key + Scale</div>
+                <div className="panelSubtitle">
+                  Drives the circle of fifths and the fretboard.
+                </div>
+              </div>
+              <Controls
+                roots={ROOTS}
+                scales={SCALES}
+                root={root}
+                scaleId={scaleId}
+                onRootChange={setRoot}
+                onScaleChange={setScaleId}
+              />
+            </>
+          }
         />
       </main>
     </div>

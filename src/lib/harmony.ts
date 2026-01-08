@@ -20,6 +20,21 @@ export type DiatonicChord = {
     | "aug7";
 };
 
+export type ChordTone = {
+  pc: number;
+  text: string;
+  degree: "1" | "3" | "5" | "7";
+};
+
+export type ChordFocus = {
+  id: string;
+  keyId: string;
+  mode: "major" | "minor";
+  kind: "triad" | "7th";
+  label: string;
+  tones: ChordTone[];
+};
+
 function mod(n: number, m: number) {
   return ((n % m) + m) % m;
 }
@@ -149,6 +164,30 @@ export function buildDiatonicChords(spelled: SpelledScale, kind: "triad" | "7th"
   return chords;
 }
 
+export function chordTonesForDiatonic(
+  spelled: SpelledScale,
+  chord: DiatonicChord,
+  kind: "triad" | "7th"
+): ChordTone[] {
+  const N = spelled.degrees.length;
+  if (N === 0) return [];
+  const steps = kind === "triad" ? [0, 2, 4] : [0, 2, 4, 6];
+  const degreeLabels: ChordTone["degree"][] = kind === "triad" ? ["1", "3", "5"] : ["1", "3", "5", "7"];
+
+  return steps
+    .map((step, idx) => {
+      const degreeIndex = mod(chord.degreeIndex + step, N);
+      const note = spelled.degrees[degreeIndex]?.note;
+      if (!note) return null;
+      return {
+        pc: note.pc,
+        text: note.text,
+        degree: degreeLabels[idx],
+      };
+    })
+    .filter((tone): tone is ChordTone => Boolean(tone));
+}
+
 export type ModeInKeySignature = {
   modeName: string;
   scaleId: "major" | "dorian" | "phrygian" | "lydian" | "mixolydian" | "natural_minor" | "locrian";
@@ -174,4 +213,3 @@ export function modesForMajorKeySignature(majorSpelled: SpelledScale): ModeInKey
     tonicText: majorSpelled.degrees[i]?.note.text ?? "",
   }));
 }
-

@@ -2,9 +2,9 @@
 
 ## Tuning
 
-- Standard tuning only:
-  - E A D G B E
-- Stored internally with octave data for future expansion
+- Default: standard tuning (E A D G B E)
+- Users can customize each string's open note
+  - String 6 is the top/highest row; string 1 is the bottom/lowest row
 
 ## Layout
 
@@ -15,9 +15,9 @@
 
 ## Rendering Rules
 
-- Only notes belonging to the selected scale are rendered
-- Non-scale frets are blank
-- Each rendered note displays its spelled note name
+- Notes in the selected scale are rendered with note + degree
+- Non-scale frets are blank unless a chord focus is active
+- Chord focus (from Circle of Fifths) reveals chord tones across the neck
 - Pitch-class identity is mapped back to spelled scale notes
 
 ## Inlays

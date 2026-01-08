@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { formatDegree, parseRoot, type SpelledScale } from "../lib/music";
+import type { ChordFocus } from "../lib/harmony";
 import { INLAY_FRETS, DOUBLE_INLAY_FRETS } from "../lib/guitar";
 
 const TUNING_OPTIONS = [
@@ -35,11 +36,17 @@ export function Fretboard({
   tuning,
   onTuningChange,
   onResetTuning,
+  chordFocus,
+  onClearChordFocus,
+  keyScaleSection,
 }: {
   spelled: SpelledScale;
   tuning: string[];
   onTuningChange: (index: number, value: string) => void;
   onResetTuning: () => void;
+  chordFocus: ChordFocus | null;
+  onClearChordFocus: () => void;
+  keyScaleSection?: ReactNode;
 }) {
   const frets = Array.from({ length: 24 }, (_, i) => i + 1); // 1..24 (no open string column)
   const tuningNotes = useMemo(
@@ -54,6 +61,10 @@ export function Fretboard({
     () => tuning.map((_, index) => index),
     [tuning],
   );
+  const chordToneMap = useMemo(() => {
+    if (!chordFocus) return null;
+    return new Map(chordFocus.tones.map((tone) => [tone.pc, tone]));
+  }, [chordFocus]);
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -81,9 +92,27 @@ export function Fretboard({
       <div className="panelHeader">
         <div className="panelTitle">Fretboard</div>
         <div className="panelSubtitle">
-          Full-width map. Scroll if needed. Only in-scale notes are shown. Root
-          is more saturated.
+          Full-width map. Scroll if needed. In-scale notes are shown; chord focus
+          adds chord tones. Root is more saturated.
         </div>
+        {chordFocus && (
+          <div className="chordFocusBar">
+            <div className="chordFocusText">
+              Chord focus:{" "}
+              <span className="chordFocusName">
+                {chordFocus.label} ·{" "}
+                {chordFocus.kind === "triad" ? "Triad" : "7ths"}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="chordFocusClear"
+              onClick={onClearChordFocus}
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="tuningSection">
@@ -139,6 +168,10 @@ export function Fretboard({
         </div>
       </div>
 
+      {keyScaleSection && (
+        <div className="fretboardKeyScale">{keyScaleSection}</div>
+      )}
+
       <div className="fretboardScroll">
         <div className="fretboard">
           {/* Fret numbers row */}
@@ -168,8 +201,8 @@ export function Fretboard({
                   <span className="stringLabelRow">
                     <span className="stringNumber">S{stringNumber}</span>
                     <span className="stringNote">{note.text}</span>
-                    {isTop && <span className="stringHint">· High</span>}
-                    {isBottom && <span className="stringHint">· Low</span>}
+                    {isTop && <span className="stringHint">· High/Light</span>}
+                    {isBottom && <span className="stringHint">· Low/Heavy</span>}
                   </span>
                 </div>
 
@@ -177,14 +210,36 @@ export function Fretboard({
                   const openPc = tuningNotes[stringIndex]?.pc ?? 0;
                   const pc = mod12(openPc + fret);
                   const degreeIndex = spelled.pcToDegreeIndex.get(pc);
+                  const chordTone = chordToneMap?.get(pc);
 
                   if (degreeIndex === undefined) {
-                    return <div key={fret} className="fretCell blank" />;
+                    if (!chordTone) {
+                      return <div key={fret} className="fretCell blank" />;
+                    }
+                    return (
+                      <div
+                        key={fret}
+                        className={[
+                          "fretCell",
+                          "chordOnly",
+                          "isChordTone",
+                        ].join(" ")}
+                        title={`${chordTone.text} (Chord ${chordTone.degree})`}
+                      >
+                        <div className="noteText">{chordTone.text}</div>
+                        <div className="noteDegree mono chordDegree">
+                          {chordTone.degree}
+                        </div>
+                      </div>
+                    );
                   }
 
                   const degree = spelled.scale.degrees[degreeIndex];
                   const note = spelled.degrees[degreeIndex].note;
                   const isRoot = degreeIndex === 0;
+                  const isChordTone = Boolean(chordTone);
+                  const titleParts = [`${note.text} (${degree.number})`];
+                  if (chordTone) titleParts.push(`Chord ${chordTone.degree}`);
 
                   return (
                     <div
@@ -194,8 +249,9 @@ export function Fretboard({
                         "note",
                         `degree-${degree.number}`,
                         isRoot ? "isRoot" : "",
+                        isChordTone ? "isChordTone" : "",
                       ].join(" ")}
-                      title={`${note.text} (${degree.number})`}
+                      title={titleParts.join(" · ")}
                     >
                       <div className="noteText">{note.text}</div>
                       <div className="noteDegree mono">

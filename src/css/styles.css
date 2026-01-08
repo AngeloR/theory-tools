@@ -37,6 +37,13 @@
   --quality-diminished: #5b4d45;
   --quality-half-diminished: #4a5662;
   --quality-augmented: #2f6a4f;
+  --chord-ring: 0 0 0 2px rgba(160, 92, 24, 0.35);
+  --cof-major-ring: rgba(170, 112, 60, 0.35);
+  --cof-minor-ring: rgba(78, 118, 165, 0.35);
+  --cof-dim-ring: rgba(98, 92, 84, 0.3);
+  --cof-major-chip: rgba(255, 232, 208, 0.7);
+  --cof-minor-chip: rgba(210, 226, 245, 0.7);
+  --cof-dim-chip: rgba(244, 238, 230, 0.8);
   color-scheme: light;
 
   /* Desktop-first layout + sizing tokens */
@@ -87,6 +94,13 @@
   --quality-diminished: #b5b1a3;
   --quality-half-diminished: #b0c0cf;
   --quality-augmented: #8fd1b0;
+  --chord-ring: 0 0 0 2px rgba(231, 185, 106, 0.45);
+  --cof-major-ring: rgba(226, 170, 92, 0.3);
+  --cof-minor-ring: rgba(120, 170, 230, 0.3);
+  --cof-dim-ring: rgba(198, 198, 198, 0.2);
+  --cof-major-chip: rgba(91, 66, 37, 0.35);
+  --cof-minor-chip: rgba(46, 66, 92, 0.35);
+  --cof-dim-chip: rgba(58, 58, 58, 0.35);
   color-scheme: dark;
 }
 
@@ -174,11 +188,10 @@ select {
   padding: var(--page-pad-y) var(--page-pad-x) 28px;
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(360px, 1fr) minmax(480px, 1.2fr);
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "controls controls"
-    "degree circle"
-    "fretboard fretboard";
+    "circle"
+    "fretboard";
 }
 
 .panel {
@@ -202,6 +215,33 @@ select {
   color: var(--muted);
   font-size: 13px;
 }
+.chordFocusBar {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chordFocusText {
+  font-size: 12px;
+  color: var(--muted);
+}
+.chordFocusName {
+  color: var(--text);
+  font-weight: 700;
+}
+.chordFocusClear {
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-muted);
+  color: var(--text);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
 .headerActions {
   display: flex;
   align-items: center;
@@ -219,46 +259,26 @@ select {
   cursor: pointer;
 }
 
-.degreePanel {
-  grid-area: degree;
-}
 .cofPanel {
   grid-area: circle;
-}
-.controlsPanel {
-  grid-area: controls;
 }
 .fretboardPanel {
   grid-area: fretboard;
   grid-column: 1 / -1;
   width: 100%;
 }
-
-.degreeStrip {
+.fretboardKeyScale {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-}
-
-.degreePill {
-  display: inline-flex;
-  align-items: center;
   gap: 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  background: var(--surface-soft);
 }
-
-.degreePillDegree {
-  font-weight: 900;
+.fretboardKeyScaleHeader .panelTitle {
+  font-size: 13px;
+}
+.fretboardKeyScaleHeader .panelSubtitle {
   font-size: 12px;
-  letter-spacing: 0.2px;
-}
-
-.degreePillNote {
-  font-size: 14px;
-  font-weight: 750;
 }
 
 .teacherHintDetails {
@@ -306,10 +326,11 @@ select {
 /* Circle of fifths tool */
 .cofLayout {
   display: grid;
-  grid-template-columns: minmax(320px, 380px) minmax(320px, 1fr);
+  grid-template-columns: minmax(320px, 1fr);
   gap: 14px;
   align-items: start;
 }
+
 
 .cofCircleWrap {
   display: grid;
@@ -319,11 +340,34 @@ select {
 
 .cofCircle {
   position: relative;
-  width: 360px;
-  height: 360px;
+  width: 500px;
+  height: 500px;
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
   background: var(--surface-soft);
+}
+.cofCircle::before,
+.cofCircle::after {
+  content: "";
+  position: absolute;
+  inset: 40px;
+  border-radius: 999px;
+  border: 1px solid var(--cof-major-ring);
+  pointer-events: none;
+  z-index: 0;
+}
+.cofCircle::after {
+  inset: 110px;
+  border-style: dashed;
+  border-color: var(--cof-minor-ring);
+}
+.cofRingDim {
+  position: absolute;
+  inset: 164px;
+  border-radius: 999px;
+  border: 1px dotted var(--cof-dim-ring);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .cofKey {
@@ -345,6 +389,42 @@ select {
   gap: 2px;
   padding: 6px 4px;
   text-align: center;
+  z-index: 1;
+}
+.cofKeyMajor {
+  border-color: var(--cof-major-ring);
+  background: var(--cof-major-chip);
+}
+.cofKeyMinor {
+  width: 52px;
+  height: 52px;
+  font-size: 11px;
+  border-color: var(--cof-minor-ring);
+  background: var(--cof-minor-chip);
+}
+.cofKeyDim {
+  width: 38px;
+  height: 38px;
+  font-size: 9px;
+  border-color: var(--cof-dim-ring);
+  background: var(--cof-dim-chip);
+  padding: 4px 3px;
+  gap: 1px;
+  cursor: default;
+}
+.cofKeyDim .cofKeyLabel {
+  font-size: 10px;
+}
+.cofKeyDim .cofKeyChord {
+  font-size: 8px;
+  padding: 2px 3px;
+}
+.cofKeyMinor .cofKeyChord {
+  font-size: 9px;
+  padding: 2px 4px;
+}
+.cofKeyMinor .cofKeyLabel {
+  font-size: 11px;
 }
 .cofKey.isSelected {
   border-color: var(--border-emphasis);
@@ -387,8 +467,8 @@ select {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 130px;
-  height: 130px;
+  width: 96px;
+  height: 96px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
   background: var(--surface-strong);
@@ -396,15 +476,16 @@ select {
   place-items: center;
   text-align: center;
   padding: 10px;
+  z-index: 2;
 }
 .cofCenterKey {
   font-weight: 900;
-  font-size: 18px;
+  font-size: 16px;
 }
 .cofCenterLabel {
   margin-top: 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
 }
 
@@ -412,6 +493,23 @@ select {
   display: none; /* shown on small screens */
   gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
+}
+.cofKeyListSection {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+.cofKeyListTitle {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+}
+.cofKeyListRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: center;
 }
 .cofKeyListBtn {
@@ -428,15 +526,30 @@ select {
   border-color: var(--border-emphasis);
 }
 
-.cofSidebar {
-  display: grid;
-  gap: 12px;
-  align-content: start;
-}
 .cofSectionTitle {
   color: var(--muted);
   font-size: 12px;
   margin-top: 2px;
+}
+.cofModesBlock {
+  margin-top: 14px;
+  display: grid;
+  gap: 10px;
+}
+.cofModesBlock .modeStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.cofModesBlock .modePill {
+  min-width: 0;
+  padding: 10px 12px;
+}
+.cofModesBlock .modePillTop {
+  font-size: 12px;
+}
+.cofModesBlock .modePillMain {
+  font-size: 14px;
 }
 .cofChordBlock {
   margin-top: 16px;
@@ -518,6 +631,18 @@ select {
   gap: 6px;
   justify-items: center;
   text-align: center;
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+}
+.chordMatrixCell.isSelected {
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
+}
+.chordMatrixCell:focus-visible {
+  outline: none;
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
 }
 .chordMatrixChord {
   font-size: 13px;
@@ -771,6 +896,20 @@ select {
 .fretCell.blank {
   background: var(--surface-blank);
   border-color: var(--border-dim);
+  opacity: 0.55;
+}
+.fretCell.chordOnly {
+  background: var(--surface-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.fretCell.isChordTone {
+  border-color: var(--border-emphasis);
+  box-shadow: var(--chord-ring);
 }
 
 .fretCell.note {
@@ -787,6 +926,9 @@ select {
 .noteDegree {
   font-size: 10px;
   color: var(--text-soft);
+}
+.noteDegree.chordDegree {
+  color: var(--text-strong);
 }
 
 /* Degree color tokens (consistent across keys/scales)
