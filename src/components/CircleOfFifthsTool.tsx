@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SCALES, spellScale } from "../lib/music";
 import {
   buildDiatonicChords,
@@ -26,6 +26,8 @@ const CIRCLE_KEYS: CoFKey[] = [
   { id: "Bb", label: "B♭" },
   { id: "F", label: "F" },
 ];
+
+const COF_STORAGE_KEY = "guitar-cof-key";
 
 type QualityCategory =
   | "major"
@@ -113,8 +115,17 @@ function posForIndex(i: number, count: number, radius: number) {
 }
 
 export function CircleOfFifthsTool() {
-  const [selectedKey, setSelectedKey] = useState<string>("C");
+  const [selectedKey, setSelectedKey] = useState<string>(() => {
+    if (typeof window === "undefined") return "C";
+    const stored = window.localStorage.getItem(COF_STORAGE_KEY) ?? "C";
+    return CIRCLE_KEY_IDS.has(stored) ? stored : "C";
+  });
   const major = useMemo(() => SCALES.find((s) => s.id === "major") ?? SCALES[0], []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(COF_STORAGE_KEY, selectedKey);
+  }, [selectedKey]);
 
   const spelledMajor = useMemo(() => spellScale(selectedKey, major), [selectedKey, major]);
   const showDiatonic = isDiatonic7Unique(spelledMajor);

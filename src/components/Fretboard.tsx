@@ -42,9 +42,18 @@ export function Fretboard({
   onResetTuning: () => void;
 }) {
   const frets = Array.from({ length: 24 }, (_, i) => i + 1); // 1..24 (no open string column)
-  const tuningNotes = useMemo(() => tuning.map((note) => parseRoot(note)), [tuning]);
-  const tuningDisplayIndices = useMemo(() => tuning.map((_, index) => index).reverse(), [tuning]);
-  const fretboardDisplayIndices = useMemo(() => tuning.map((_, index) => index), [tuning]);
+  const tuningNotes = useMemo(
+    () => tuning.map((note) => parseRoot(note)),
+    [tuning],
+  );
+  const tuningDisplayIndices = useMemo(
+    () => tuning.map((_, index) => index).reverse(),
+    [tuning],
+  );
+  const fretboardDisplayIndices = useMemo(
+    () => tuning.map((_, index) => index),
+    [tuning],
+  );
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -72,20 +81,24 @@ export function Fretboard({
       <div className="panelHeader">
         <div className="panelTitle">Fretboard</div>
         <div className="panelSubtitle">
-          Full-width map. Scroll if needed. Only in-scale notes are shown. Root is
-          more saturated.
+          Full-width map. Scroll if needed. Only in-scale notes are shown. Root
+          is more saturated.
         </div>
       </div>
 
       <div className="tuningSection">
         <div className="tuningHeader">
-          <div className="tuningTitle">Tuning (string 1 low → string 6 high)</div>
+          <div className="tuningTitle">
+            Tuning (string 1 low → string 6 high)
+          </div>
           <div className="tuningHeaderActions">
             <button type="button" className="tuningReset" onClick={handleReset}>
               Reset to Standard
             </button>
             <span
-              className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
+              className={["tuningToast", showToast ? "isVisible" : ""].join(
+                " ",
+              )}
               role="status"
               aria-live="polite"
             >
@@ -103,8 +116,12 @@ export function Fretboard({
               <label key={`tuning-${stringIndex}`} className="tuningControl">
                 <span className="tuningLabel">
                   String {stringNumber}
-                  {isTop && <span className="tuningHint">Top · low/heavy</span>}
-                  {isBottom && <span className="tuningHint">Bottom · high/light</span>}
+                  {isTop && (
+                    <span className="tuningHint">· Top (low/heavy)</span>
+                  )}
+                  {isBottom && (
+                    <span className="tuningHint">· Bottom (high/light)</span>
+                  )}
                 </span>
                 <select
                   value={note}
@@ -148,10 +165,12 @@ export function Fretboard({
             return (
               <div key={`${note.text}-${stringIndex}`} className="stringRow">
                 <div className="stringLabel">
-                  <span className="stringNumber">S{stringNumber}</span>
-                  {note.text}
-                  {isTop && <span className="stringHint">High/Light</span>}
-                  {isBottom && <span className="stringHint">Low/Heavy</span>}
+                  <span className="stringLabelRow">
+                    <span className="stringNumber">S{stringNumber}</span>
+                    <span className="stringNote">{note.text}</span>
+                    {isTop && <span className="stringHint">· High</span>}
+                    {isBottom && <span className="stringHint">· Low</span>}
+                  </span>
                 </div>
 
                 {frets.map((fret) => {
@@ -167,22 +186,24 @@ export function Fretboard({
                   const note = spelled.degrees[degreeIndex].note;
                   const isRoot = degreeIndex === 0;
 
-                return (
-                  <div
-                    key={fret}
-                    className={[
-                      "fretCell",
-                      "note",
-                      `degree-${degree.number}`,
-                      isRoot ? "isRoot" : "",
-                    ].join(" ")}
-                    title={`${note.text} (${degree.number})`}
-                  >
-                    <div className="noteText">{note.text}</div>
-                    <div className="noteDegree mono">{formatDegree(degree)}</div>
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={fret}
+                      className={[
+                        "fretCell",
+                        "note",
+                        `degree-${degree.number}`,
+                        isRoot ? "isRoot" : "",
+                      ].join(" ")}
+                      title={`${note.text} (${degree.number})`}
+                    >
+                      <div className="noteText">{note.text}</div>
+                      <div className="noteDegree mono">
+                        {formatDegree(degree)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             );
           })}
