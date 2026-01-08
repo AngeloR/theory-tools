@@ -1,19 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap");
+
 :root {
-  --bg: #0b0d12;
-  --panel: #121623;
-  --panel2: #0f1320;
-  --text: #e9ecf3;
-  --muted: #aab2c5;
-  --grid: rgba(255, 255, 255, 0.08);
+  --bg: #f3f0e7;
+  --panel: #ffffff;
+  --panel2: #fbf7ef;
+  --text: #1f1b16;
+  --muted: #5b5f6a;
+  --grid: rgba(31, 27, 22, 0.08);
+  --shadow: 0 18px 38px rgba(34, 26, 18, 0.14);
 
-  /* Layout + sizing tokens (tuned for desktop; overridden on mobile) */
-  --page-pad-x: 16px;
-  --page-pad-y: 14px;
-  --panel-pad: 12px;
+  /* Desktop-first layout + sizing tokens */
+  --page-pad-x: 28px;
+  --page-pad-y: 18px;
+  --panel-pad: 14px;
 
-  --string-label-w: 44px;
-  --fret-w: 38px;
-  --fret-h: 38px;
+  --string-label-w: 56px;
+  --fret-w: 42px;
+  --fret-h: 36px;
   --fret-gap: 6px;
 }
 
@@ -24,80 +27,104 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial;
+  background: var(--bg);
+  font-family: "Space Grotesk", "IBM Plex Sans", "Noto Sans", "Trebuchet MS",
+    sans-serif;
+}
+body {
+  min-width: 1080px;
+  line-height: 1.4;
+  background-image:
+    radial-gradient(circle at 12% 16%, rgba(255, 255, 255, 0.85), transparent 52%),
+    radial-gradient(circle at 88% 10%, rgba(208, 225, 255, 0.45), transparent 46%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.035) 0 1px, transparent 1px 36px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.03) 0 1px, transparent 1px 36px);
+  background-attachment: fixed;
 }
 .mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  font-family: "IBM Plex Mono", "Fira Mono", "Cascadia Mono", Consolas,
+    "Courier New", monospace;
 }
 
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  max-width: 1480px;
+  margin: 0 auto;
 }
 .header {
-  padding: 16px var(--page-pad-x) 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+  padding: 20px var(--page-pad-x) 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), transparent);
 }
 .titleBlock {
-  margin-bottom: 12px;
+  margin-bottom: 2px;
 }
 .title {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
+  letter-spacing: 0.2px;
 }
 .subtitle {
   font-size: 13px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .controls {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(200px, 1fr));
   gap: 12px;
-  flex-wrap: wrap;
+  width: 100%;
 }
 .control {
   display: grid;
   gap: 6px;
-  flex: 1 1 220px;
 }
 .controlLabel {
   font-size: 12px;
   color: var(--muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
 }
 select {
   background: var(--panel);
   color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 9px 12px;
   font-size: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .main {
-  padding: var(--page-pad-y) var(--page-pad-x) 20px;
+  padding: var(--page-pad-y) var(--page-pad-x) 28px;
   display: grid;
-  gap: 14px;
+  gap: 18px;
+  grid-template-columns: minmax(360px, 1fr) minmax(480px, 1.2fr);
+  grid-template-areas:
+    "controls controls"
+    "degree circle"
+    "fretboard fretboard";
 }
 
 .panel {
-  background: var(--panel2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   padding: var(--panel-pad);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow);
 }
 .panelHeader {
   margin-bottom: 10px;
 }
 .panelTitle {
   font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
 }
 .panelSubtitle {
   margin-top: 4px;
@@ -105,28 +132,40 @@ select {
   font-size: 13px;
 }
 
+.degreePanel {
+  grid-area: degree;
+}
+.cofPanel {
+  grid-area: circle;
+}
+.controlsPanel {
+  grid-area: controls;
+}
+.fretboardPanel {
+  grid-area: fretboard;
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .degreeStrip {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
 }
 
 .degreePill {
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .degreePillDegree {
   font-weight: 900;
-  font-size: 13px;
+  font-size: 12px;
   letter-spacing: 0.2px;
 }
 
@@ -155,28 +194,306 @@ select {
 }
 .chordStrip {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
 }
 .chordPill {
-  flex: 0 0 auto;
-  min-width: 140px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.02);
+  min-width: 120px;
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
 }
 .chordPillTop {
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(30, 28, 24, 0.7);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.2px;
 }
 .chordPillMain {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* Circle of fifths tool */
+.cofLayout {
+  display: grid;
+  grid-template-columns: minmax(320px, 380px) minmax(320px, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.cofCircleWrap {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.cofCircle {
+  position: relative;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.cofKey {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 62px;
+  height: 62px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  text-align: center;
+}
+.cofKey.isSelected {
+  border-color: rgba(0, 0, 0, 0.28);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+}
+.cofKey.isOut {
+  opacity: 0.45;
+}
+.cofKeyLabel {
+  font-size: 12px;
+  line-height: 1;
+}
+.cofKeyChord {
+  min-height: 14px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(31, 27, 22, 0.8);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.cofKeyChord.isEmpty {
+  opacity: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.cofKeyRoman {
+  font-size: 9px;
+  letter-spacing: 0.3px;
+}
+
+.cofCenter {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 130px;
+  height: 130px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 10px;
+}
+.cofCenterKey {
+  font-weight: 900;
+  font-size: 18px;
+}
+.cofCenterLabel {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cofKeyList {
+  display: none; /* shown on small screens */
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cofKeyListBtn {
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--text);
+  padding: 8px 10px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+.cofKeyListBtn.isSelected {
+  border-color: rgba(0, 0, 0, 0.28);
+}
+
+.cofSidebar {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.cofSectionTitle {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.cofChordBlock {
+  margin-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+.cofInfoHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cofInfoSubtitle {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.cofQualityLegend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.cofQualityLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+
+.chordMatrix {
+  display: grid;
+  gap: 8px;
+  padding-top: 4px;
+  width: 100%;
+}
+.chordMatrixHeader,
+.chordMatrixRow {
+  display: grid;
+  grid-template-columns: minmax(72px, 90px) repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+.chordMatrixCorner {
+  min-height: 1px;
+}
+.chordMatrixHeaderCell {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 6px 6px 8px;
+  text-align: center;
+}
+.chordMatrixHeaderRoman {
+  font-size: 12px;
+  font-weight: 800;
+}
+.chordMatrixHeaderDegree {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.chordMatrixRowLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+  align-self: center;
+}
+.chordMatrixCell {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 8px 6px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+.chordMatrixChord {
+  font-size: 13px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.cofEmpty {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 8px 0 4px;
+}
+
+.qualityTag {
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+.quality-major {
+  color: #7a4a14;
+}
+.quality-minor {
+  color: #2f5a82;
+}
+.quality-dominant {
+  color: #9a551e;
+}
+.quality-diminished {
+  color: #5b4d45;
+}
+.quality-half-diminished {
+  color: #4a5662;
+}
+.quality-augmented {
+  color: #2f6a4f;
+}
+
+
+.modeStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.modePill {
+  min-width: 110px;
+  padding: 8px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.modePillTop {
+  color: rgba(30, 28, 24, 0.7);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+.modePillMain {
+  margin-top: 6px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -196,9 +513,9 @@ select {
 }
 .degreeCell {
   padding: 10px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.65);
 }
 .degreeTag {
   font-weight: 700;
@@ -216,14 +533,84 @@ select {
 }
 
 /* Fretboard */
+.tuningSection {
+  margin: 12px 0 6px;
+  display: grid;
+  gap: 10px;
+}
+.tuningHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.tuningHeaderActions {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+.tuningTitle {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+}
+.tuningReset {
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+.tuningToast {
+  min-height: 14px;
+  font-size: 11px;
+  color: #2f6a4f;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.tuningToast.isVisible {
+  opacity: 1;
+}
+.tuningControls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.tuningControl {
+  display: grid;
+  gap: 6px;
+}
+.tuningLabel {
+  font-size: 11px;
+  color: var(--muted);
+  display: grid;
+  gap: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+.tuningHint {
+  font-size: 10px;
+  color: rgba(31, 27, 22, 0.7);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.tuningControl select {
+  width: 100%;
+}
+
 .fretboardScroll {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 6px;
+  padding-bottom: 8px;
 }
 .fretboard {
   width: max-content;
-} /* ensures scroll on mobile */
+}
 .fretHeader {
   display: grid;
   grid-template-columns: var(--string-label-w) repeat(24, var(--fret-w));
@@ -241,7 +628,7 @@ select {
   font-size: 11px;
   color: var(--muted);
   padding: 6px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 .inlayMark {
   display: block;
@@ -261,92 +648,78 @@ select {
   text-align: center;
   font-size: 12px;
   color: var(--muted);
+  display: grid;
+  gap: 2px;
+  align-content: center;
+  justify-items: center;
+}
+.stringNumber {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: rgba(31, 27, 22, 0.7);
+}
+.stringHint {
+  font-size: 10px;
+  color: rgba(31, 27, 22, 0.6);
 }
 
 .fretCell {
   height: var(--fret-h);
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.65);
   display: grid;
   place-items: center;
 }
 .fretCell.blank {
-  background: rgba(255, 255, 255, 0.01);
-  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(0, 0, 0, 0.05);
 }
 
 .fretCell.note {
   font-weight: 800;
   letter-spacing: 0.2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 .noteText {
   font-size: 12px;
 }
-
-/* Mobile optimization */
-@media (max-width: 560px) {
-  :root {
-    --page-pad-x: 12px;
-    --page-pad-y: 12px;
-    --panel-pad: 10px;
-
-    --string-label-w: 34px;
-    --fret-w: 32px;
-    --fret-h: 32px;
-    --fret-gap: 5px;
-  }
-
-  .title {
-    font-size: 16px;
-  }
-  .subtitle,
-  .panelSubtitle {
-    font-size: 12px;
-  }
-
-  .controls {
-    gap: 10px;
-  }
-  .control {
-    flex: 1 1 100%;
-  }
-  select {
-    width: 100%;
-  }
-
-  .noteText {
-    font-size: 11px;
-  }
+.noteDegree {
+  font-size: 10px;
+  color: rgba(31, 27, 22, 0.7);
 }
 
 /* Degree color tokens (consistent across keys/scales)
      Using HSL so we can "root = more saturated" cleanly */
 .degree-1 {
   /* Root should NOT be pastel (stands out) */
-  background: hsl(0 75% 42% / 0.55);
+  background: hsl(8 70% 50% / 0.22);
 }
 .degree-2 {
-  background: hsl(28 55% 70% / 0.38);
+  background: hsl(28 70% 55% / 0.18);
 }
 .degree-3 {
-  background: hsl(55 55% 70% / 0.38);
+  background: hsl(50 75% 55% / 0.18);
 }
 .degree-4 {
-  background: hsl(120 45% 68% / 0.36);
+  background: hsl(120 45% 50% / 0.18);
 }
 .degree-5 {
-  background: hsl(200 50% 68% / 0.36);
+  background: hsl(200 55% 50% / 0.18);
 }
 .degree-6 {
-  background: hsl(235 50% 70% / 0.36);
+  background: hsl(235 55% 55% / 0.18);
 }
 .degree-7 {
-  background: hsl(285 50% 70% / 0.36);
+  background: hsl(285 55% 55% / 0.18);
 }
 
 .isRoot {
   /* Root emphasis */
   filter: saturate(1.15) brightness(1.03) contrast(1.05);
-  border-color: rgba(255, 255, 255, 0.28);
+  border-color: rgba(0, 0, 0, 0.28);
 }
