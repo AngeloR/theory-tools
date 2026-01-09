@@ -37,7 +37,7 @@
   --quality-diminished: #5b4d45;
   --quality-half-diminished: #4a5662;
   --quality-augmented: #2f6a4f;
-  --chord-ring: 0 0 0 2px rgba(160, 92, 24, 0.35);
+  --chord-ring: 0 0 0 3px rgba(160, 92, 24, 0.45);
   --cof-major-ring: rgba(170, 112, 60, 0.35);
   --cof-minor-ring: rgba(78, 118, 165, 0.35);
   --cof-dim-ring: rgba(98, 92, 84, 0.3);
@@ -94,7 +94,7 @@
   --quality-diminished: #b5b1a3;
   --quality-half-diminished: #b0c0cf;
   --quality-augmented: #8fd1b0;
-  --chord-ring: 0 0 0 2px rgba(231, 185, 106, 0.45);
+  --chord-ring: 0 0 0 3px rgba(231, 185, 106, 0.6);
   --cof-major-ring: rgba(226, 170, 92, 0.3);
   --cof-minor-ring: rgba(120, 170, 230, 0.3);
   --cof-dim-ring: rgba(198, 198, 198, 0.2);
@@ -241,6 +241,66 @@ select {
   font-weight: 700;
   letter-spacing: 0.2px;
   cursor: pointer;
+}
+.cagedSection {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+.cagedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cagedTitle {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+}
+.cagedSubtitle {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.cagedRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+.cagedButton {
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.cagedButton.isSelected {
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
+}
+.cagedButton:focus-visible {
+  outline: none;
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
+}
+.cagedShape {
+  font-weight: 800;
+  font-size: 13px;
+}
+.cagedRange {
+  font-size: 11px;
+  color: var(--text-soft);
+}
+.cagedFrets {
+  font-size: 11px;
+  color: var(--muted);
 }
 .headerActions {
   display: flex;
@@ -874,6 +934,7 @@ select {
 .fretCell.isChordTone {
   border-color: var(--border-emphasis);
   box-shadow: var(--chord-ring);
+  filter: saturate(1.35) brightness(1.08);
 }
 
 .fretCell.note {
@@ -883,6 +944,10 @@ select {
   flex-direction: column;
   align-items: center;
   gap: 2px;
+}
+.fretboard.hasChordFocus .fretCell.note:not(.isChordTone) {
+  opacity: 0.38;
+  filter: saturate(0.6);
 }
 .noteText {
   font-size: 12px;
