@@ -52,7 +52,7 @@
   --panel-pad: 14px;
 
   --string-label-w: 56px;
-  --fret-w: 42px;
+  --fret-min: 34px;
   --fret-h: 36px;
   --fret-gap: 6px;
 }
@@ -744,54 +744,12 @@ select {
 }
 
 /* Fretboard */
-.tuningSection {
-  margin: 12px 0 6px;
-  display: grid;
-  gap: 10px;
-}
-.tuningHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.tuningHeaderActions {
+.fretboardActions {
+  margin-top: 8px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
-}
-.tuningHeaderText {
-  display: grid;
-  gap: 4px;
-}
-.tuningTitle {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  color: var(--muted);
-}
-.tuningSummaryText {
-  font-size: 12px;
-  color: var(--text-soft);
-}
-.tuningToggle {
-  border-radius: 999px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface-muted);
-  color: var(--text);
-  padding: 6px 10px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-}
-.tuningResetGroup {
-  display: grid;
-  justify-items: end;
-  gap: 4px;
 }
 .tuningReset {
   border-radius: 999px;
@@ -814,44 +772,17 @@ select {
 .tuningToast.isVisible {
   opacity: 1;
 }
-.tuningControls {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-}
-.tuningControl {
-  display: grid;
-  gap: 6px;
-}
-.tuningLabel {
-  font-size: 11px;
-  color: var(--muted);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.2px;
-}
-.tuningHint {
-  font-size: 10px;
-  color: var(--text-soft);
-  text-transform: none;
-  letter-spacing: 0;
-}
-.tuningControl select {
-  width: 100%;
-}
 
 .fretboardScroll {
   overflow-x: auto;
   padding-bottom: 8px;
 }
 .fretboard {
-  width: max-content;
+  width: 100%;
 }
 .fretHeader {
   display: grid;
-  grid-template-columns: var(--string-label-w) repeat(24, var(--fret-w));
+  grid-template-columns: var(--string-label-w) repeat(24, minmax(var(--fret-min), 1fr));
   gap: var(--fret-gap);
   align-items: center;
   margin-bottom: 8px;
@@ -863,6 +794,10 @@ select {
 .fretNumber {
   position: relative;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   font-size: 11px;
   color: var(--muted);
   padding: 6px 0;
@@ -872,12 +807,14 @@ select {
   display: block;
   font-size: 10px;
   opacity: 0.6;
-  margin-top: 2px;
+}
+.fretNumberValue {
+  line-height: 1;
 }
 
 .stringRow {
   display: grid;
-  grid-template-columns: var(--string-label-w) repeat(24, var(--fret-w));
+  grid-template-columns: var(--string-label-w) repeat(24, minmax(var(--fret-min), 1fr));
   gap: var(--fret-gap);
   align-items: center;
   margin: 6px 0;
@@ -895,19 +832,21 @@ select {
   align-items: center;
   gap: 6px;
 }
-.stringNote {
+.stringTuningSelect {
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
   color: var(--text);
   font-weight: 700;
+  font-size: 12px;
+  padding: 2px 6px;
+  cursor: pointer;
+  min-width: 42px;
 }
-.stringNumber {
-  font-size: 10px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  color: var(--text-soft);
-}
-.stringHint {
-  font-size: 10px;
-  color: var(--text-faint);
+.stringTuningSelect:focus-visible {
+  outline: none;
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
 }
 
 .fretCell {

@@ -52,14 +52,6 @@ export function Fretboard({
     () => tuning.map((note) => parseRoot(note)),
     [tuning],
   );
-  const tuningSummary = useMemo(
-    () => tuning.slice().reverse().map(formatNote).join(" "),
-    [tuning],
-  );
-  const tuningDisplayIndices = useMemo(
-    () => tuning.map((_, index) => index).reverse(),
-    [tuning],
-  );
   const fretboardDisplayIndices = useMemo(
     () => tuning.map((_, index) => index),
     [tuning],
@@ -68,7 +60,6 @@ export function Fretboard({
     if (!chordFocus) return null;
     return new Map(chordFocus.tones.map((tone) => [tone.pc, tone]));
   }, [chordFocus]);
-  const [showTuningControls, setShowTuningControls] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -97,7 +88,20 @@ export function Fretboard({
         <div className="panelTitle">Fretboard</div>
         <div className="panelSubtitle">
           Full-width map. Scroll if needed. In-scale notes are shown; chord focus
-          adds chord tones. Root is more saturated.
+          adds chord tones. Root is more saturated. Click a string label to
+          retune it.
+        </div>
+        <div className="fretboardActions">
+          <button type="button" className="tuningReset" onClick={handleReset}>
+            Reset tuning
+          </button>
+          <span
+            className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
+            role="status"
+            aria-live="polite"
+          >
+            Tuning reset to standard.
+          </span>
         </div>
         {chordFocus && (
           <div className="chordFocusBar">
@@ -119,75 +123,6 @@ export function Fretboard({
         )}
       </div>
 
-      <div className="tuningSection">
-        <div className="tuningHeader">
-          <div className="tuningHeaderText">
-            <div className="tuningTitle">Tuning</div>
-            <div className="tuningSummaryText mono">
-              {tuningSummary} · low → high
-            </div>
-          </div>
-          <div className="tuningHeaderActions">
-            <button
-              type="button"
-              className="tuningToggle"
-              onClick={() => setShowTuningControls((prev) => !prev)}
-            >
-              {showTuningControls ? "Hide tuning" : "Edit tuning"}
-            </button>
-            {showTuningControls && (
-              <div className="tuningResetGroup">
-                <button type="button" className="tuningReset" onClick={handleReset}>
-                  Reset to Standard
-                </button>
-                <span
-                  className={["tuningToast", showToast ? "isVisible" : ""].join(
-                    " ",
-                  )}
-                  role="status"
-                  aria-live="polite"
-                >
-                  Tuning reset to standard.
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-        {showTuningControls && (
-          <div className="tuningControls">
-            {tuningDisplayIndices.map((stringIndex, position) => {
-              const note = tuning[stringIndex];
-              const stringNumber = tuning.length - stringIndex;
-              const isTop = position === 0;
-              const isBottom = position === tuningDisplayIndices.length - 1;
-              return (
-                <label key={`tuning-${stringIndex}`} className="tuningControl">
-                  <span className="tuningLabel">
-                    String {stringNumber}
-                    {isTop && (
-                      <span className="tuningHint">· Top (low/heavy)</span>
-                    )}
-                    {isBottom && (
-                      <span className="tuningHint">· Bottom (high/light)</span>
-                    )}
-                  </span>
-                  <select
-                    value={note}
-                    onChange={(e) => onTuningChange(stringIndex, e.target.value)}
-                  >
-                    {TUNING_OPTIONS.map((option) => (
-                      <option key={`${stringIndex}-${option}`} value={option}>
-                        {formatNote(option)}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
       <div className="fretboardScroll">
         <div className="fretboard">
           {/* Fret numbers row */}
@@ -195,27 +130,37 @@ export function Fretboard({
             <div className="stringLabelSpacer" />
             {frets.map((f) => (
               <div key={f} className="fretNumber">
-                {f}
                 {INLAY_FRETS.has(f) && (
                   <span className="inlayMark">
                     {DOUBLE_INLAY_FRETS.has(f) ? "●●" : "●"}
                   </span>
                 )}
+                <span className="fretNumberValue">{f}</span>
               </div>
             ))}
           </div>
 
           {/* Strings */}
-          {fretboardDisplayIndices.map((stringIndex, position) => {
+          {fretboardDisplayIndices.map((stringIndex) => {
             const note = tuningNotes[stringIndex];
             const stringNumber = tuningNotes.length - stringIndex;
             return (
               <div key={`${note.text}-${stringIndex}`} className="stringRow">
                 <div className="stringLabel">
-                  <span className="stringLabelRow">
-                    <span className="stringNumber">S{stringNumber}</span>
-                    <span className="stringNote">{note.text}</span>
-                  </span>
+                  <label className="stringLabelRow">
+                    <select
+                      className="stringTuningSelect"
+                      value={tuning[stringIndex]}
+                      onChange={(e) => onTuningChange(stringIndex, e.target.value)}
+                      aria-label={`String ${stringNumber} tuning`}
+                    >
+                      {TUNING_OPTIONS.map((option) => (
+                        <option key={`${stringIndex}-${option}`} value={option}>
+                          {formatNote(option)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
 
                 {frets.map((fret) => {
