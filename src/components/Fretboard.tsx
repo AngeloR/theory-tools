@@ -48,6 +48,18 @@ type CagedPosition = {
   degrees: Array<ChordDegree | null>;
 };
 
+type ChordToneInfo = {
+  pc: number;
+  text: string;
+  degree: ChordDegree;
+};
+
+type CagedCandidate = {
+  fret: number | null;
+  degree: ChordDegree | null;
+  cost: number;
+};
+
 const MAX_FRET = 24;
 const CAGED_SPAN = 4;
 
@@ -105,69 +117,175 @@ function mod12(n: number) {
   return ((n % 12) + 12) % 12;
 }
 
-function findFretForPc(
+function findFretsForPc(
   openPc: number,
   targetPc: number,
   minFret: number,
   maxFret: number,
 ) {
+  const frets: number[] = [];
   for (let fret = minFret; fret <= maxFret; fret += 1) {
-    if (mod12(openPc + fret) === targetPc) return fret;
+    if (mod12(openPc + fret) === targetPc) frets.push(fret);
   }
-  return null;
+  return frets;
+}
+
+function chooseCagedVoicing(
+  tuningNotes: Array<{ pc: number }>,
+  chordTones: ChordToneInfo[],
+  requiredDegrees: ChordDegree[],
+  baseFret: number,
+  maxFret: number,
+  shape: CagedShape,
+  rootFret: number,
+  kind: "triad" | "7th",
+) {
+  const degrees = kind === "triad" ? shape.triadDegrees : shape.seventhDegrees;
+  const offsets = kind === "triad" ? shape.triadOffsets : shape.seventhOffsets;
+  const candidatesByString: CagedCandidate[][] = [];
+
+  for (let stringIndex = 0; stringIndex < tuningNotes.length; stringIndex += 1) {
+    if (stringIndex === shape.rootString) {
+      candidatesByString.push([{ fret: rootFret, degree: "1", cost: 0 }]);
+      continue;
+    }
+
+    const preferredDegree = degrees[stringIndex];
+    const targetOffset = offsets[stringIndex];
+    const targetFret = targetOffset === null ? null : baseFret + targetOffset;
+    const openPc = tuningNotes[stringIndex]?.pc ?? 0;
+    const candidates: CagedCandidate[] = [];
+
+    for (let fret = baseFret; fret <= maxFret; fret += 1) {
+      const pc = mod12(openPc + fret);
+      chordTones.forEach((tone) => {
+        if (tone.pc !== pc) return;
+        const distanceCost = targetFret === null ? 0 : Math.abs(fret - targetFret);
+        const degreeCost =
+          preferredDegree && tone.degree !== preferredDegree ? 2 : 0;
+        const mutePenalty = preferredDegree ? 0 : 1;
+        candidates.push({
+          fret,
+          degree: tone.degree,
+          cost: distanceCost + degreeCost + mutePenalty,
+        });
+      });
+    }
+
+    const muteCost = preferredDegree ? 2 : 0;
+    candidates.push({ fret: null, degree: null, cost: muteCost });
+    candidatesByString.push(candidates);
+  }
+
+  const best = {
+    score: Number.POSITIVE_INFINITY,
+    frets: [] as Array<number | null>,
+    degrees: [] as Array<ChordDegree | null>,
+  };
+  const counts: Record<ChordDegree, number> = { "1": 0, "3": 0, "5": 0, "7": 0 };
+  const frets = new Array<number | null>(tuningNotes.length).fill(null);
+  const degreeAssignments = new Array<ChordDegree | null>(tuningNotes.length).fill(null);
+
+  const search = (index: number, score: number) => {
+    if (score >= best.score) return;
+    if (index === candidatesByString.length) {
+      const missing = requiredDegrees.filter((d) => counts[d] === 0);
+      if (missing.length > 0) return;
+
+      let duplicatePenalty = 0;
+      requiredDegrees.forEach((d) => {
+        const extra = counts[d] - 1;
+        if (extra > 0) duplicatePenalty += extra;
+      });
+      const total = score + duplicatePenalty;
+      if (total < best.score) {
+        best.score = total;
+        best.frets = [...frets];
+        best.degrees = [...degreeAssignments];
+      }
+      return;
+    }
+
+    candidatesByString[index].forEach((candidate) => {
+      frets[index] = candidate.fret;
+      degreeAssignments[index] = candidate.degree;
+      if (candidate.degree) counts[candidate.degree] += 1;
+      search(index + 1, score + candidate.cost);
+      if (candidate.degree) counts[candidate.degree] -= 1;
+    });
+  };
+
+  search(0, 0);
+  if (!best.frets.length) return null;
+
+  return {
+    frets: best.frets,
+    degrees: best.degrees,
+    score: best.score,
+  };
 }
 
 function buildCagedPositions(
   tuningNotes: Array<{ pc: number }>,
-  degreeMap: Map<ChordDegree, { pc: number }>,
+  degreeMap: Map<ChordDegree, ChordToneInfo>,
   kind: "triad" | "7th",
-) {
+): CagedPosition[] {
   const rootTone = degreeMap.get("1");
   if (!rootTone) return [];
+  const chordTones = Array.from(degreeMap.values());
+  const requiredDegrees: ChordDegree[] =
+    kind === "triad" ? ["1", "3", "5"] : ["1", "3", "5", "7"];
 
   return CAGED_SHAPES.flatMap((shape) => {
-    const degrees = kind === "triad" ? shape.triadDegrees : shape.seventhDegrees;
-    const offsets = kind === "triad" ? shape.triadOffsets : shape.seventhOffsets;
     const rootOpenPc = tuningNotes[shape.rootString]?.pc ?? 0;
     const minRootFret = shape.rootOffset + 1;
     const maxRootFret = MAX_FRET - (CAGED_SPAN - 1) + shape.rootOffset;
-    const rootFret = findFretForPc(rootOpenPc, rootTone.pc, minRootFret, maxRootFret);
-    if (rootFret === null) return [];
+    const rootFrets = findFretsForPc(rootOpenPc, rootTone.pc, minRootFret, maxRootFret);
+    if (rootFrets.length === 0) return [];
 
-    const baseFret = rootFret - shape.rootOffset;
-    const maxFret = baseFret + CAGED_SPAN - 1;
-    if (baseFret < 1 || maxFret > MAX_FRET) return [];
+    let bestPosition: (CagedPosition & { score: number }) | null = null;
 
-    const frets = degrees.map((degree, stringIndex) => {
-      if (!degree) return null;
-      const tone = degreeMap.get(degree);
-      if (!tone) return null;
-      const openPc = tuningNotes[stringIndex]?.pc ?? 0;
-      if (stringIndex === shape.rootString) return rootFret;
+    for (const rootFret of rootFrets) {
+      const baseFret = rootFret - shape.rootOffset;
+      const maxFret = baseFret + CAGED_SPAN - 1;
+      if (baseFret < 1 || maxFret > MAX_FRET) continue;
 
-      const candidates: number[] = [];
-      for (let fret = baseFret; fret <= maxFret; fret += 1) {
-        if (mod12(openPc + fret) === tone.pc) candidates.push(fret);
-      }
-      if (candidates.length === 0) return null;
-
-      const targetOffset = offsets[stringIndex];
-      if (targetOffset === null) return candidates[0];
-      const targetFret = baseFret + targetOffset;
-      return candidates.reduce((best, fret) =>
-        Math.abs(fret - targetFret) < Math.abs(best - targetFret) ? fret : best,
+      const voicing = chooseCagedVoicing(
+        tuningNotes,
+        chordTones,
+        requiredDegrees,
+        baseFret,
+        maxFret,
+        shape,
+        rootFret,
+        kind,
       );
-    });
+      if (!voicing) continue;
 
-    return [
-      {
+      const position: CagedPosition & { score: number } = {
         id: shape.id,
         baseFret,
         maxFret,
-        frets,
-        degrees,
+        frets: voicing.frets,
+        degrees: voicing.degrees,
+        score: voicing.score,
+      };
+
+      if (!bestPosition || position.score < bestPosition.score) {
+        bestPosition = position;
+      }
+    }
+
+    if (!bestPosition) return [];
+    return [
+      {
+        id: bestPosition.id,
+        baseFret: bestPosition.baseFret,
+        maxFret: bestPosition.maxFret,
+        frets: bestPosition.frets,
+        degrees: bestPosition.degrees,
       },
-    ] satisfies CagedPosition[];
+    ];
   });
 }
 
