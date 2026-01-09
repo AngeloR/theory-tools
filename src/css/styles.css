@@ -805,11 +805,18 @@ select {
 
 /* Fretboard */
 .fretboardActions {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+.fretboardFooter {
   margin-top: 8px;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: flex-end;
+}
+.fretboardFooterSpacer {
+  flex: 1;
 }
 .tuningReset {
   border-radius: 999px;

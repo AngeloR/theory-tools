@@ -270,18 +270,6 @@ export function Fretboard({
           uses CAGED voicings. Root is more saturated. Click a string label to
           retune it.
         </div>
-        <div className="fretboardActions">
-          <button type="button" className="tuningReset" onClick={handleReset}>
-            Reset tuning
-          </button>
-          <span
-            className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
-            role="status"
-            aria-live="polite"
-          >
-            Tuning reset to standard.
-          </span>
-        </div>
         {chordFocus && (
           <div className="chordFocusBar">
             <div className="chordFocusText">
@@ -439,6 +427,21 @@ export function Fretboard({
               </div>
             );
           })}
+        </div>
+      </div>
+      <div className="fretboardFooter">
+        <div className="fretboardFooterSpacer" />
+        <div className="fretboardActions">
+          <button type="button" className="tuningReset" onClick={handleReset}>
+            Reset tuning
+          </button>
+          <span
+            className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
+            role="status"
+            aria-live="polite"
+          >
+            Tuning reset to standard.
+          </span>
         </div>
       </div>
     </section>
