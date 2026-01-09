@@ -31,7 +31,7 @@ const CIRCLE_KEYS: CoFKey[] = [
 
 const COF_STORAGE_KEY = "guitar-cof-key";
 const COF_MODE_STORAGE_KEY = "guitar-cof-mode";
-type KeyMode = "major" | "minor";
+type KeyMode = "major" | "minor" | "diminished";
 type ChordRing = "major" | "minor" | "diminished";
 
 type QualityCategory =
@@ -122,9 +122,15 @@ function posForIndex(i: number, count: number, radius: number) {
 export function CircleOfFifthsTool({
   chordFocus,
   onChordFocus,
+  activeRoot,
+  activeScaleId,
+  onScaleSelect,
 }: {
   chordFocus: ChordFocus | null;
   onChordFocus: (focus: ChordFocus | null) => void;
+  activeRoot: string;
+  activeScaleId: string;
+  onScaleSelect: (rootText: string, scaleId: string) => void;
 }) {
   const [selectedKey, setSelectedKey] = useState<string>(() => {
     if (typeof window === "undefined") return "C";
@@ -134,11 +140,17 @@ export function CircleOfFifthsTool({
   const [keyMode, setKeyMode] = useState<KeyMode>(() => {
     if (typeof window === "undefined") return "major";
     const stored = window.localStorage.getItem(COF_MODE_STORAGE_KEY);
-    return stored === "minor" || stored === "major" ? stored : "major";
+    return stored === "minor" || stored === "major" || stored === "diminished"
+      ? stored
+      : "major";
   });
   const major = useMemo(() => SCALES.find((s) => s.id === "major") ?? SCALES[0], []);
   const minor = useMemo(
     () => SCALES.find((s) => s.id === "natural_minor") ?? SCALES[0],
+    [],
+  );
+  const locrian = useMemo(
+    () => SCALES.find((s) => s.id === "locrian") ?? SCALES[0],
     [],
   );
 
@@ -166,16 +178,20 @@ export function CircleOfFifthsTool({
     return map;
   }, [major]);
 
-  const dimLabelMap = useMemo(() => {
-    const map = new Map<string, string>();
+  const dimMaps = useMemo(() => {
+    const labelMap = new Map<string, string>();
+    const idMap = new Map<string, string>();
     CIRCLE_KEYS.forEach((k) => {
       const spelled = spellScale(k.id, major);
       const leadingTone = spelled.degrees[6]?.note.text;
       if (!leadingTone) return;
-      map.set(k.id, `${leadingTone}°`);
+      labelMap.set(k.id, `${leadingTone}°`);
+      idMap.set(k.id, normalizeNoteId(leadingTone));
     });
-    return map;
+    return { labelMap, idMap };
   }, [major]);
+  const dimLabelMap = dimMaps.labelMap;
+  const dimKeyMap = dimMaps.idMap;
 
   const minorToMajorMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -193,20 +209,40 @@ export function CircleOfFifthsTool({
     return map;
   }, [minorToMajorMap]);
 
+  const dimToMajorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    dimKeyMap.forEach((dimId, majorId) => {
+      map.set(dimId, majorId);
+    });
+    return map;
+  }, [dimKeyMap]);
+
+  const dimPcMap = useMemo(() => {
+    const map = new Map<number, string>();
+    dimKeyMap.forEach((dimId) => {
+      map.set(parseRoot(dimId).pc, dimId);
+    });
+    return map;
+  }, [dimKeyMap]);
+
   const activeKeyId =
     keyMode === "major"
       ? selectedKey
-      : relativeMinorMap.get(selectedKey)?.id ?? selectedKey;
+      : keyMode === "minor"
+        ? relativeMinorMap.get(selectedKey)?.id ?? selectedKey
+        : dimKeyMap.get(selectedKey) ?? selectedKey;
+  const normalizedActiveRoot = normalizeNoteId(activeRoot);
 
   const signatureMajor = useMemo(
     () => spellScale(selectedKey, major),
     [selectedKey, major],
   );
 
-  const spelledKey = useMemo(
-    () => spellScale(activeKeyId, keyMode === "major" ? major : minor),
-    [activeKeyId, keyMode, major, minor],
-  );
+  const spelledKey = useMemo(() => {
+    const scale =
+      keyMode === "major" ? major : keyMode === "minor" ? minor : locrian;
+    return spellScale(activeKeyId, scale);
+  }, [activeKeyId, keyMode, locrian, major, minor]);
 
   useEffect(() => {
     if (
@@ -221,6 +257,23 @@ export function CircleOfFifthsTool({
   const triads = showDiatonic ? buildDiatonicChords(spelledKey, "triad") : [];
   const sevenths = showDiatonic ? buildDiatonicChords(spelledKey, "7th") : [];
   const modes = modesForMajorKeySignature(signatureMajor);
+  const modeStartIndex = useMemo(() => {
+    if (keyMode === "major") return 0;
+    const activePc = parseRoot(activeKeyId).pc;
+    const idx = signatureMajor.degrees.findIndex((d) => d.note.pc === activePc);
+    return idx >= 0 ? idx : 0;
+  }, [activeKeyId, keyMode, signatureMajor]);
+  const orderedModes = useMemo(() => {
+    if (modes.length === 0 || modeStartIndex === 0) return modes;
+    return [...modes.slice(modeStartIndex), ...modes.slice(0, modeStartIndex)];
+  }, [modes, modeStartIndex]);
+  const modeSignatureLabel =
+    keyMode === "major"
+      ? `${signatureMajor.root.text} major`
+      : keyMode === "minor"
+        ? `${spelledKey.root.text} minor · ${signatureMajor.root.text} major`
+        : `${spelledKey.root.text} dim · ${signatureMajor.root.text} major`;
+  const keyModeLabel = keyMode === "diminished" ? "dim" : keyMode;
 
   const qualityLegend = useMemo(() => {
     const used = new Set([...triads, ...sevenths].map((c) => c.quality));
@@ -293,7 +346,10 @@ export function CircleOfFifthsTool({
       if (ring === "minor") {
         circleId = circleIdForMinor(rootNote);
       } else if (ring === "diminished") {
-        circleId = selectedKey;
+        const normalizedRoot = normalizeNoteId(rootNote);
+        const rootPc = parseRoot(normalizedRoot).pc;
+        const dimId = dimPcMap.get(rootPc);
+        circleId = dimId ? dimToMajorMap.get(dimId) : undefined;
       } else {
         circleId = circleIdForNote(rootNote);
       }
@@ -310,7 +366,7 @@ export function CircleOfFifthsTool({
     });
 
     return { major: majorMap, minor: minorMap, diminished: dimMap };
-  }, [minorPcMap, minorToMajorMap, selectedKey, spelledKey, triads]);
+  }, [dimPcMap, dimToMajorMap, minorPcMap, minorToMajorMap, spelledKey, triads]);
 
   const handleChordSelect = (kind: "triad" | "7th", chord: DiatonicChord) => {
     const chordId = `${kind}-${keyMode}-${activeKeyId}-${chord.degreeIndex}`;
@@ -333,6 +389,17 @@ export function CircleOfFifthsTool({
   const handleKeySelect = (mode: KeyMode, keyId: string) => {
     setKeyMode(mode);
     setSelectedKey(keyId);
+    if (mode === "major") {
+      onScaleSelect(keyId, major.id);
+      return;
+    }
+    if (mode === "minor") {
+      const minorKey = relativeMinorMap.get(keyId)?.id ?? keyId;
+      onScaleSelect(minorKey, minor.id);
+      return;
+    }
+    const dimKey = dimKeyMap.get(keyId) ?? keyId;
+    onScaleSelect(dimKey, locrian.id);
   };
 
   return (
@@ -341,8 +408,8 @@ export function CircleOfFifthsTool({
         <div className="panelTitle">Circle of Fifths</div>
         <div className="panelSubtitle">
           Outer ring = major keys. Inner ring = relative minor keys. Click any
-          key to focus it. Center ring = diminished chords aligned to each
-          major key. Chords land on the ring that matches their quality.
+          key to focus it. Center ring = diminished keys aligned to each major
+          key. Chords land on the ring that matches their quality.
         </div>
       </div>
 
@@ -430,16 +497,19 @@ export function CircleOfFifthsTool({
             {CIRCLE_KEYS.map((k, i) => {
               const { x, y } = posForIndex(i, CIRCLE_KEYS.length, 86);
               const dimLabel = dimLabelMap.get(k.id) ?? `${k.label}°`;
+              const isSelected = keyMode === "diminished" && selectedKey === k.id;
               const chordInfo = chordByRing.diminished.get(k.id);
               const isInKey = Boolean(chordInfo);
               const degreeClass = chordInfo ? `degree-${chordInfo.degreeNumber}` : "";
               return (
-                <div
+                <button
                   key={`dim-${k.id}`}
+                  type="button"
                   role="listitem"
                   className={[
                     "cofKey",
                     "cofKeyDim",
+                    isSelected ? "isSelected" : "",
                     isInKey ? "isInKey" : "isOut",
                     chordInfo?.isRoot ? "isRoot" : "",
                   ].join(" ")}
@@ -447,6 +517,8 @@ export function CircleOfFifthsTool({
                     left: `calc(50% + ${x}px)`,
                     top: `calc(50% + ${y}px)`,
                   }}
+                  onClick={() => handleKeySelect("diminished", k.id)}
+                  aria-pressed={isSelected}
                 >
                   <span className="cofKeyLabel">{dimLabel}</span>
                   <span
@@ -458,12 +530,12 @@ export function CircleOfFifthsTool({
                     {chordInfo ? chordInfo.chordText : ""}
                     {chordInfo?.roman && <span className="cofKeyRoman mono">{chordInfo.roman}</span>}
                   </span>
-                </div>
+                </button>
               );
             })}
             <div className="cofCenter">
               <div className="cofCenterKey mono">{spelledKey.root.text}</div>
-              <div className="cofCenterLabel">{keyMode}</div>
+              <div className="cofCenterLabel">{keyModeLabel}</div>
             </div>
           </div>
 
@@ -507,21 +579,53 @@ export function CircleOfFifthsTool({
                 })}
               </div>
             </div>
+            <div className="cofKeyListSection">
+              <div className="cofKeyListTitle">Diminished keys</div>
+              <div className="cofKeyListRow">
+                {CIRCLE_KEYS.map((k) => {
+                  const isSelected = keyMode === "diminished" && selectedKey === k.id;
+                  const dimLabel = dimLabelMap.get(k.id) ?? `${k.label}°`;
+                  return (
+                    <button
+                      key={`list-dim-${k.id}`}
+                      type="button"
+                      className={["cofKeyListBtn", isSelected ? "isSelected" : ""].join(" ")}
+                      onClick={() => handleKeySelect("diminished", k.id)}
+                      aria-pressed={isSelected}
+                    >
+                      {dimLabel}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="cofModesBlock">
-        <div className="cofSectionTitle">
-          Modes in key signature ({signatureMajor.root.text} major)
-        </div>
-        <div className="modeStrip" role="list" aria-label="Modes in this key signature">
-          {modes.map((m) => (
-            <div key={m.scaleId} role="listitem" className="modePill">
-              <div className="modePillTop mono">{m.tonicText}</div>
-              <div className="modePillMain">{m.modeName}</div>
-            </div>
-          ))}
+        <div className="cofModesBlock">
+          <div className="cofSectionTitle">
+            Modes in key signature ({modeSignatureLabel})
+          </div>
+          <div className="modeStrip" role="list" aria-label="Modes in this key signature">
+          {orderedModes.map((m) => {
+            const modeRoot = normalizeNoteId(m.tonicText);
+            const isActive =
+              modeRoot === normalizedActiveRoot && m.scaleId === activeScaleId;
+            return (
+              <button
+                key={m.scaleId}
+                type="button"
+                role="listitem"
+                className={["modePill", isActive ? "isSelected" : ""].join(" ")}
+                onClick={() => onScaleSelect(modeRoot, m.scaleId)}
+                aria-pressed={isActive}
+              >
+                <div className="modePillTop mono">{m.tonicText}</div>
+                <div className="modePillMain">{m.modeName}</div>
+              </button>
+            );
+          })}
         </div>
       </div>
 

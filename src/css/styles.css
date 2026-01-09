@@ -267,19 +267,6 @@ select {
   grid-column: 1 / -1;
   width: 100%;
 }
-.fretboardKeyScale {
-  margin-top: 8px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border-subtle);
-  display: grid;
-  gap: 10px;
-}
-.fretboardKeyScaleHeader .panelTitle {
-  font-size: 13px;
-}
-.fretboardKeyScaleHeader .panelSubtitle {
-  font-size: 12px;
-}
 
 .teacherHintDetails {
   margin-top: 10px;
@@ -410,7 +397,7 @@ select {
   background: var(--cof-dim-chip);
   padding: 4px 3px;
   gap: 1px;
-  cursor: default;
+  cursor: pointer;
 }
 .cofKeyDim .cofKeyLabel {
   font-size: 10px;
@@ -696,6 +683,18 @@ select {
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
   background: var(--surface-soft);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.modePill.isSelected {
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
+}
+.modePill:focus-visible {
+  outline: none;
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
 }
 .modePillTop {
   color: var(--text-soft);
@@ -752,14 +751,20 @@ select {
 }
 .tuningHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
 }
 .tuningHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tuningHeaderText {
   display: grid;
-  justify-items: end;
   gap: 4px;
 }
 .tuningTitle {
@@ -767,6 +772,26 @@ select {
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--muted);
+}
+.tuningSummaryText {
+  font-size: 12px;
+  color: var(--text-soft);
+}
+.tuningToggle {
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-muted);
+  color: var(--text);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+.tuningResetGroup {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
 }
 .tuningReset {
   border-radius: 999px;

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import "./css/styles.css";
 import { SCALES, spellScale, type ScaleDef } from "./lib/music";
-import { Controls } from "./components/Controls";
 import { CircleOfFifthsTool } from "./components/CircleOfFifthsTool";
 import { Fretboard } from "./components/Fretboard";
 import type { ChordFocus } from "./lib/harmony";
@@ -14,34 +13,6 @@ const TUNING_STORAGE_KEY = "guitar-tuning";
 type Theme = "light" | "dark";
 
 export default function App() {
-  const ROOTS = [
-    // naturals
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "A",
-    "B",
-    // sharps
-    "C#",
-    "D#",
-    "F#",
-    "G#",
-    "A#",
-    // flats
-    "Db",
-    "Eb",
-    "Gb",
-    "Ab",
-    "Bb",
-    // edge spellings (you wanted Cb major support)
-    "Cb",
-    "Fb",
-    "E#",
-    "B#",
-  ];
-
   const [root, setRoot] = useState<string>(() => {
     if (typeof window === "undefined") return "C";
     return window.localStorage.getItem(ROOT_STORAGE_KEY) ?? "C";
@@ -124,7 +95,16 @@ export default function App() {
       </header>
 
       <main className="main">
-        <CircleOfFifthsTool chordFocus={chordFocus} onChordFocus={setChordFocus} />
+        <CircleOfFifthsTool
+          chordFocus={chordFocus}
+          onChordFocus={setChordFocus}
+          activeRoot={root}
+          activeScaleId={scaleId}
+          onScaleSelect={(nextRoot, nextScaleId) => {
+            setRoot(nextRoot);
+            setScaleId(nextScaleId);
+          }}
+        />
         <Fretboard
           spelled={spelled}
           tuning={tuning}
@@ -134,24 +114,6 @@ export default function App() {
           onResetTuning={() => setTuning([...STANDARD_TUNING])}
           chordFocus={chordFocus}
           onClearChordFocus={() => setChordFocus(null)}
-          keyScaleSection={
-            <>
-              <div className="fretboardKeyScaleHeader">
-                <div className="panelTitle">Key + Scale</div>
-                <div className="panelSubtitle">
-                  Drives the circle of fifths and the fretboard.
-                </div>
-              </div>
-              <Controls
-                roots={ROOTS}
-                scales={SCALES}
-                root={root}
-                scaleId={scaleId}
-                onRootChange={setRoot}
-                onScaleChange={setScaleId}
-              />
-            </>
-          }
         />
       </main>
     </div>

@@ -29,7 +29,7 @@ export type ChordTone = {
 export type ChordFocus = {
   id: string;
   keyId: string;
-  mode: "major" | "minor";
+  mode: "major" | "minor" | "diminished";
   kind: "triad" | "7th";
   label: string;
   tones: ChordTone[];

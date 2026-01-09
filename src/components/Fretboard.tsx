@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDegree, parseRoot, type SpelledScale } from "../lib/music";
 import type { ChordFocus } from "../lib/harmony";
 import { INLAY_FRETS, DOUBLE_INLAY_FRETS } from "../lib/guitar";
@@ -38,7 +38,6 @@ export function Fretboard({
   onResetTuning,
   chordFocus,
   onClearChordFocus,
-  keyScaleSection,
 }: {
   spelled: SpelledScale;
   tuning: string[];
@@ -46,11 +45,15 @@ export function Fretboard({
   onResetTuning: () => void;
   chordFocus: ChordFocus | null;
   onClearChordFocus: () => void;
-  keyScaleSection?: ReactNode;
 }) {
   const frets = Array.from({ length: 24 }, (_, i) => i + 1); // 1..24 (no open string column)
+  const formatNote = (note: string) => note.replace("b", "♭").replace("#", "♯");
   const tuningNotes = useMemo(
     () => tuning.map((note) => parseRoot(note)),
+    [tuning],
+  );
+  const tuningSummary = useMemo(
+    () => tuning.slice().reverse().map(formatNote).join(" "),
     [tuning],
   );
   const tuningDisplayIndices = useMemo(
@@ -65,6 +68,7 @@ export function Fretboard({
     if (!chordFocus) return null;
     return new Map(chordFocus.tones.map((tone) => [tone.pc, tone]));
   }, [chordFocus]);
+  const [showTuningControls, setShowTuningControls] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -117,60 +121,72 @@ export function Fretboard({
 
       <div className="tuningSection">
         <div className="tuningHeader">
-          <div className="tuningTitle">
-            Tuning (string 1 low → string 6 high)
+          <div className="tuningHeaderText">
+            <div className="tuningTitle">Tuning</div>
+            <div className="tuningSummaryText mono">
+              {tuningSummary} · low → high
+            </div>
           </div>
           <div className="tuningHeaderActions">
-            <button type="button" className="tuningReset" onClick={handleReset}>
-              Reset to Standard
-            </button>
-            <span
-              className={["tuningToast", showToast ? "isVisible" : ""].join(
-                " ",
-              )}
-              role="status"
-              aria-live="polite"
+            <button
+              type="button"
+              className="tuningToggle"
+              onClick={() => setShowTuningControls((prev) => !prev)}
             >
-              Tuning reset to standard.
-            </span>
+              {showTuningControls ? "Hide tuning" : "Edit tuning"}
+            </button>
+            {showTuningControls && (
+              <div className="tuningResetGroup">
+                <button type="button" className="tuningReset" onClick={handleReset}>
+                  Reset to Standard
+                </button>
+                <span
+                  className={["tuningToast", showToast ? "isVisible" : ""].join(
+                    " ",
+                  )}
+                  role="status"
+                  aria-live="polite"
+                >
+                  Tuning reset to standard.
+                </span>
+              </div>
+            )}
           </div>
         </div>
-        <div className="tuningControls">
-          {tuningDisplayIndices.map((stringIndex, position) => {
-            const note = tuning[stringIndex];
-            const stringNumber = tuning.length - stringIndex;
-            const isTop = position === 0;
-            const isBottom = position === tuningDisplayIndices.length - 1;
-            return (
-              <label key={`tuning-${stringIndex}`} className="tuningControl">
-                <span className="tuningLabel">
-                  String {stringNumber}
-                  {isTop && (
-                    <span className="tuningHint">· Top (low/heavy)</span>
-                  )}
-                  {isBottom && (
-                    <span className="tuningHint">· Bottom (high/light)</span>
-                  )}
-                </span>
-                <select
-                  value={note}
-                  onChange={(e) => onTuningChange(stringIndex, e.target.value)}
-                >
-                  {TUNING_OPTIONS.map((option) => (
-                    <option key={`${stringIndex}-${option}`} value={option}>
-                      {option.replace("b", "♭").replace("#", "♯")}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            );
-          })}
-        </div>
+        {showTuningControls && (
+          <div className="tuningControls">
+            {tuningDisplayIndices.map((stringIndex, position) => {
+              const note = tuning[stringIndex];
+              const stringNumber = tuning.length - stringIndex;
+              const isTop = position === 0;
+              const isBottom = position === tuningDisplayIndices.length - 1;
+              return (
+                <label key={`tuning-${stringIndex}`} className="tuningControl">
+                  <span className="tuningLabel">
+                    String {stringNumber}
+                    {isTop && (
+                      <span className="tuningHint">· Top (low/heavy)</span>
+                    )}
+                    {isBottom && (
+                      <span className="tuningHint">· Bottom (high/light)</span>
+                    )}
+                  </span>
+                  <select
+                    value={note}
+                    onChange={(e) => onTuningChange(stringIndex, e.target.value)}
+                  >
+                    {TUNING_OPTIONS.map((option) => (
+                      <option key={`${stringIndex}-${option}`} value={option}>
+                        {formatNote(option)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      {keyScaleSection && (
-        <div className="fretboardKeyScale">{keyScaleSection}</div>
-      )}
 
       <div className="fretboardScroll">
         <div className="fretboard">
@@ -193,16 +209,12 @@ export function Fretboard({
           {fretboardDisplayIndices.map((stringIndex, position) => {
             const note = tuningNotes[stringIndex];
             const stringNumber = tuningNotes.length - stringIndex;
-            const isTop = position === 0;
-            const isBottom = position === fretboardDisplayIndices.length - 1;
             return (
               <div key={`${note.text}-${stringIndex}`} className="stringRow">
                 <div className="stringLabel">
                   <span className="stringLabelRow">
                     <span className="stringNumber">S{stringNumber}</span>
                     <span className="stringNote">{note.text}</span>
-                    {isTop && <span className="stringHint">· High/Light</span>}
-                    {isBottom && <span className="stringHint">· Low/Heavy</span>}
                   </span>
                 </div>
 
