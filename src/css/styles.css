@@ -194,6 +194,39 @@ select {
     "fretboard";
 }
 
+.tabShell {
+  grid-area: circle;
+  display: grid;
+  gap: 14px;
+}
+.tabSwitcher {
+  display: flex;
+  justify-content: flex-end;
+}
+.tabSwitchButton {
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-muted);
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  box-shadow: var(--control-highlight);
+}
+.tabSwitchButton:focus-visible {
+  outline: none;
+  border-color: var(--border-emphasis);
+  box-shadow: var(--ring);
+}
+.tabPanel {
+  gap: 16px;
+}
+.tabPanel[hidden] {
+  display: none;
+}
+
 .panel {
   background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
   border: 1px solid var(--border-subtle);
@@ -321,6 +354,26 @@ select {
 
 .cofPanel {
   grid-area: circle;
+}
+.modesPanel {
+  display: grid;
+  gap: 12px;
+}
+.modePicker {
+  display: grid;
+  gap: 8px;
+}
+.modeIntervals {
+  display: grid;
+  gap: 6px;
+}
+.modeIntervalsText {
+  padding: 8px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  font-size: 13px;
+  letter-spacing: 0.2px;
 }
 .fretboardPanel {
   grid-area: fretboard;

@@ -4,6 +4,7 @@ import { SCALES, spellScale, type ScaleDef } from "./lib/music";
 import { CircleOfFifthsTool } from "./components/CircleOfFifthsTool";
 import { Fretboard } from "./components/Fretboard";
 import type { ChordFocus } from "./lib/harmony";
+import { ModesTool, type ModeOption } from "./components/ModesTool";
 
 const STANDARD_TUNING = ["E", "B", "G", "D", "A", "E"] as const;
 const THEME_STORAGE_KEY = "guitar-theme";
@@ -11,8 +12,44 @@ const ROOT_STORAGE_KEY = "guitar-root";
 const SCALE_STORAGE_KEY = "guitar-scale";
 const TUNING_STORAGE_KEY = "guitar-tuning";
 type Theme = "light" | "dark";
+type TabId = "circle" | "modes";
+
+const MODE_OPTIONS: ModeOption[] = [
+  { id: "major", label: "Ionian" },
+  { id: "dorian", label: "Dorian" },
+  { id: "phrygian", label: "Phrygian" },
+  { id: "lydian", label: "Lydian" },
+  { id: "mixolydian", label: "Mixolydian" },
+  { id: "natural_minor", label: "Aeolian" },
+  { id: "locrian", label: "Locrian" },
+];
+
+const ROOT_OPTIONS = [
+  "C",
+  "C#",
+  "Db",
+  "D",
+  "D#",
+  "Eb",
+  "E",
+  "Fb",
+  "E#",
+  "F",
+  "F#",
+  "Gb",
+  "G",
+  "G#",
+  "Ab",
+  "A",
+  "A#",
+  "Bb",
+  "B",
+  "Cb",
+  "B#",
+];
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabId>("circle");
   const [root, setRoot] = useState<string>(() => {
     if (typeof window === "undefined") return "C";
     return window.localStorage.getItem(ROOT_STORAGE_KEY) ?? "C";
@@ -95,16 +132,48 @@ export default function App() {
       </header>
 
       <main className="main">
-        <CircleOfFifthsTool
-          chordFocus={chordFocus}
-          onChordFocus={setChordFocus}
-          activeRoot={root}
-          activeScaleId={scaleId}
-          onScaleSelect={(nextRoot, nextScaleId) => {
-            setRoot(nextRoot);
-            setScaleId(nextScaleId);
-          }}
-        />
+        <div className="tabShell">
+          <div className="tabSwitcher">
+            <button
+              type="button"
+              className="tabSwitchButton"
+              onClick={() =>
+                setActiveTab((prev) => (prev === "circle" ? "modes" : "circle"))
+              }
+              aria-label={
+                activeTab === "circle"
+                  ? "Switch to Modes"
+                  : "Switch to Circle of Fifths"
+              }
+            >
+              {activeTab === "circle" ? "Switch to Modes" : "Switch to Circle of Fifths"}
+            </button>
+          </div>
+
+          <div className="tabPanel" hidden={activeTab !== "circle"}>
+            <CircleOfFifthsTool
+              chordFocus={chordFocus}
+              onChordFocus={setChordFocus}
+              activeRoot={root}
+              activeScaleId={scaleId}
+              onScaleSelect={(nextRoot, nextScaleId) => {
+                setRoot(nextRoot);
+                setScaleId(nextScaleId);
+              }}
+            />
+          </div>
+
+          <div className="tabPanel" hidden={activeTab !== "modes"}>
+            <ModesTool
+              root={root}
+              modeId={scaleId}
+              rootOptions={ROOT_OPTIONS}
+              modes={MODE_OPTIONS}
+              onRootChange={setRoot}
+              onModeChange={setScaleId}
+            />
+          </div>
+        </div>
         <Fretboard
           spelled={spelled}
           tuning={tuning}
