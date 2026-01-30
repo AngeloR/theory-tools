@@ -11,11 +11,23 @@ const THEME_STORAGE_KEY = "guitar-theme";
 const ROOT_STORAGE_KEY = "guitar-root";
 const SCALE_STORAGE_KEY = "guitar-scale";
 const TUNING_STORAGE_KEY = "guitar-tuning";
+const SNAPSHOT_STORAGE_KEY = "guitar-snapshots";
 type Theme = "light" | "dark";
 type TabId = "circle" | "modes";
+type StoredSnapshot = {
+  id: string;
+  title: string;
+  root: string;
+  scaleId: string;
+  tuning: string[];
+  chordFocus: ChordFocus | null;
+  activeCagedId: CagedShapeId | null;
+};
 type FretboardSnapshot = {
   id: string;
   title: string;
+  root: string;
+  scaleId: string;
   spelled: SpelledScale;
   tuning: string[];
   chordFocus: ChordFocus | null;
@@ -63,6 +75,77 @@ const createSnapshotId = () => {
   return `snapshot-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
 
+const FALLBACK_SCALE = SCALES.find((s) => s.id === "major") ?? SCALES[0];
+
+const resolveScale = (id: string) => SCALES.find((s) => s.id === id) ?? FALLBACK_SCALE;
+
+const isChordFocus = (value: unknown): value is ChordFocus => {
+  if (!value || typeof value !== "object") return false;
+  const v = value as ChordFocus;
+  if (typeof v.id !== "string") return false;
+  if (typeof v.keyId !== "string") return false;
+  if (v.mode !== "major" && v.mode !== "minor" && v.mode !== "diminished") return false;
+  if (v.kind !== "triad" && v.kind !== "7th") return false;
+  if (typeof v.label !== "string") return false;
+  if (!Array.isArray(v.tones)) return false;
+  return v.tones.every(
+    (tone) =>
+      tone &&
+      typeof tone.pc === "number" &&
+      typeof tone.text === "string" &&
+      (tone.degree === "1" ||
+        tone.degree === "3" ||
+        tone.degree === "5" ||
+        tone.degree === "7"),
+  );
+};
+
+const isCagedId = (value: unknown): value is CagedShapeId =>
+  value === "C" || value === "A" || value === "G" || value === "E" || value === "D";
+
+const sanitizeTuning = (value: unknown): string[] => {
+  if (
+    Array.isArray(value) &&
+    value.length === STANDARD_TUNING.length &&
+    value.every((note) => typeof note === "string")
+  ) {
+    return value;
+  }
+  return [...STANDARD_TUNING];
+};
+
+const hydrateSnapshots = (value: unknown): FretboardSnapshot[] => {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((snapshot) => {
+    if (!snapshot || typeof snapshot !== "object") return [];
+    const candidate = snapshot as StoredSnapshot;
+    if (typeof candidate.id !== "string") return [];
+    if (typeof candidate.title !== "string") return [];
+    if (typeof candidate.root !== "string") return [];
+    if (typeof candidate.scaleId !== "string") return [];
+
+    try {
+      spellScale(candidate.root, FALLBACK_SCALE);
+    } catch {
+      return [];
+    }
+
+    const resolvedScale = resolveScale(candidate.scaleId);
+    return [
+      {
+        id: candidate.id,
+        title: candidate.title,
+        root: candidate.root,
+        scaleId: resolvedScale.id,
+        spelled: spellScale(candidate.root, resolvedScale),
+        tuning: sanitizeTuning(candidate.tuning),
+        chordFocus: isChordFocus(candidate.chordFocus) ? candidate.chordFocus : null,
+        activeCagedId: isCagedId(candidate.activeCagedId) ? candidate.activeCagedId : null,
+      },
+    ];
+  });
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("circle");
   const [root, setRoot] = useState<string>(() => {
@@ -92,7 +175,16 @@ export default function App() {
     return [...STANDARD_TUNING];
   });
   const [chordFocus, setChordFocus] = useState<ChordFocus | null>(null);
-  const [snapshots, setSnapshots] = useState<FretboardSnapshot[]>([]);
+  const [snapshots, setSnapshots] = useState<FretboardSnapshot[]>(() => {
+    if (typeof window === "undefined") return [];
+    const stored = window.localStorage.getItem(SNAPSHOT_STORAGE_KEY);
+    if (!stored) return [];
+    try {
+      return hydrateSnapshots(JSON.parse(stored));
+    } catch {
+      return [];
+    }
+  });
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "light";
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -120,6 +212,20 @@ export default function App() {
     window.localStorage.setItem(TUNING_STORAGE_KEY, JSON.stringify(tuning));
   }, [tuning]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedSnapshots: StoredSnapshot[] = snapshots.map((snapshot) => ({
+      id: snapshot.id,
+      title: snapshot.title,
+      root: snapshot.root,
+      scaleId: snapshot.scaleId,
+      tuning: snapshot.tuning,
+      chordFocus: snapshot.chordFocus,
+      activeCagedId: snapshot.activeCagedId,
+    }));
+    window.localStorage.setItem(SNAPSHOT_STORAGE_KEY, JSON.stringify(storedSnapshots));
+  }, [snapshots]);
+
   const scale: ScaleDef = useMemo(() => {
     return SCALES.find((s) => s.id === scaleId) ?? SCALES[0];
   }, [scaleId]);
@@ -134,6 +240,8 @@ export default function App() {
       {
         id: createSnapshotId(),
         title,
+        root,
+        scaleId,
         spelled,
         tuning: [...tuning],
         chordFocus,
