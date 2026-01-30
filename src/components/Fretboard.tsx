@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { formatDegree, parseRoot, type SpelledScale } from "../lib/music";
 import type { ChordFocus } from "../lib/harmony";
 import { INLAY_FRETS, DOUBLE_INLAY_FRETS } from "../lib/guitar";
@@ -28,7 +28,7 @@ const TUNING_OPTIONS = [
 ];
 
 type ChordDegree = "1" | "3" | "5" | "7";
-type CagedShapeId = "C" | "A" | "G" | "E" | "D";
+export type CagedShapeId = "C" | "A" | "G" | "E" | "D";
 
 type CagedShape = {
   id: CagedShapeId;
@@ -296,6 +296,12 @@ export function Fretboard({
   onResetTuning,
   chordFocus,
   onClearChordFocus,
+  onSnapshot,
+  readOnly = false,
+  panelTitle = "Fretboard",
+  panelSubtitle,
+  headerActions,
+  initialCagedId,
 }: {
   spelled: SpelledScale;
   tuning: string[];
@@ -303,6 +309,12 @@ export function Fretboard({
   onResetTuning: () => void;
   chordFocus: ChordFocus | null;
   onClearChordFocus: () => void;
+  onSnapshot?: (activeCagedId: CagedShapeId | null) => void;
+  readOnly?: boolean;
+  panelTitle?: string;
+  panelSubtitle?: string | null;
+  headerActions?: ReactNode;
+  initialCagedId?: CagedShapeId | null;
 }) {
   const frets = Array.from({ length: 24 }, (_, i) => i + 1); // 1..24 (no open string column)
   const formatNote = (note: string) => note.replace("b", "♭").replace("#", "♯");
@@ -322,7 +334,9 @@ export function Fretboard({
     if (!chordFocus || !chordDegreeMap) return [];
     return buildCagedPositions(tuningNotes, chordDegreeMap, chordFocus.kind);
   }, [chordDegreeMap, chordFocus, tuningNotes]);
-  const [activeCagedId, setActiveCagedId] = useState<CagedShapeId | null>(null);
+  const [activeCagedId, setActiveCagedId] = useState<CagedShapeId | null>(
+    initialCagedId ?? null,
+  );
   const [showToast, setShowToast] = useState(false);
   const toastTimer = useRef<number | null>(null);
 
@@ -378,16 +392,21 @@ export function Fretboard({
     return map;
   }, [activeCaged, chordDegreeMap]);
   const hasChordFocus = Boolean(chordFocus && activeChordPositions);
+  const subtitleText =
+    panelSubtitle === undefined
+      ? readOnly
+        ? "Snapshot of the current fretboard view."
+        : "Full-width map. Scroll if needed. In-scale notes are shown; chord focus uses CAGED voicings. Root is more saturated. Click a string label to retune it."
+      : panelSubtitle;
 
   return (
     <section className="panel fretboardPanel">
       <div className="panelHeader">
-        <div className="panelTitle">Fretboard</div>
-        <div className="panelSubtitle">
-          Full-width map. Scroll if needed. In-scale notes are shown; chord focus
-          uses CAGED voicings. Root is more saturated. Click a string label to
-          retune it.
+        <div className="panelHeaderRow">
+          <div className="panelTitle">{panelTitle}</div>
+          {headerActions && <div className="panelHeaderActions">{headerActions}</div>}
         </div>
+        {subtitleText !== null && <div className="panelSubtitle">{subtitleText}</div>}
         {chordFocus && (
           <div className="chordFocusBar">
             <div className="chordFocusText">
@@ -397,13 +416,15 @@ export function Fretboard({
                 {chordFocus.kind === "triad" ? "Triad" : "7ths"}
               </span>
             </div>
-            <button
-              type="button"
-              className="chordFocusClear"
-              onClick={onClearChordFocus}
-            >
-              Clear
-            </button>
+            {!readOnly && (
+              <button
+                type="button"
+                className="chordFocusClear"
+                onClick={onClearChordFocus}
+              >
+                Clear
+              </button>
+            )}
           </div>
         )}
         {chordFocus && cagedPositions.length > 0 && (
@@ -430,8 +451,13 @@ export function Fretboard({
                       "cagedButton",
                       isActive ? "isSelected" : "",
                     ].join(" ")}
-                    onClick={() => setActiveCagedId(pos.id)}
+                    onClick={() => {
+                      if (readOnly) return;
+                      setActiveCagedId(pos.id);
+                    }}
                     aria-pressed={isActive}
+                    aria-disabled={readOnly}
+                    disabled={readOnly}
                   >
                     <span className="cagedShape">{pos.id}</span>
                     <span className="cagedRange">
@@ -474,8 +500,13 @@ export function Fretboard({
                     <select
                       className="stringTuningSelect"
                       value={tuning[stringIndex]}
-                      onChange={(e) => onTuningChange(stringIndex, e.target.value)}
+                      onChange={
+                        readOnly
+                          ? undefined
+                          : (e) => onTuningChange(stringIndex, e.target.value)
+                      }
                       aria-label={`String ${stringNumber} tuning`}
+                      disabled={readOnly}
                     >
                       {TUNING_OPTIONS.map((option) => (
                         <option key={`${stringIndex}-${option}`} value={option}>
@@ -547,21 +578,32 @@ export function Fretboard({
           })}
         </div>
       </div>
-      <div className="fretboardFooter">
-        <div className="fretboardFooterSpacer" />
-        <div className="fretboardActions">
-          <button type="button" className="tuningReset" onClick={handleReset}>
-            Reset tuning
-          </button>
-          <span
-            className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
-            role="status"
-            aria-live="polite"
-          >
-            Tuning reset to standard.
-          </span>
+      {!readOnly && (
+        <div className="fretboardFooter">
+          <div className="fretboardFooterSpacer" />
+          <div className="fretboardActions">
+            {onSnapshot && (
+              <button
+                type="button"
+                className="snapshotButton"
+                onClick={() => onSnapshot(activeCagedId)}
+              >
+                Take snapshot
+              </button>
+            )}
+            <button type="button" className="tuningReset" onClick={handleReset}>
+              Reset tuning
+            </button>
+            <span
+              className={["tuningToast", showToast ? "isVisible" : ""].join(" ")}
+              role="status"
+              aria-live="polite"
+            >
+              Tuning reset to standard.
+            </span>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "./css/styles.css";
-import { SCALES, spellScale, type ScaleDef } from "./lib/music";
+import { SCALES, spellScale, type ScaleDef, type SpelledScale } from "./lib/music";
 import { CircleOfFifthsTool } from "./components/CircleOfFifthsTool";
-import { Fretboard } from "./components/Fretboard";
+import { Fretboard, type CagedShapeId } from "./components/Fretboard";
 import type { ChordFocus } from "./lib/harmony";
 import { ModesTool, type ModeOption } from "./components/ModesTool";
 
@@ -13,6 +13,14 @@ const SCALE_STORAGE_KEY = "guitar-scale";
 const TUNING_STORAGE_KEY = "guitar-tuning";
 type Theme = "light" | "dark";
 type TabId = "circle" | "modes";
+type FretboardSnapshot = {
+  id: string;
+  title: string;
+  spelled: SpelledScale;
+  tuning: string[];
+  chordFocus: ChordFocus | null;
+  activeCagedId: CagedShapeId | null;
+};
 
 const MODE_OPTIONS: ModeOption[] = [
   { id: "major", label: "Ionian" },
@@ -48,6 +56,13 @@ const ROOT_OPTIONS = [
   "B#",
 ];
 
+const createSnapshotId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `snapshot-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("circle");
   const [root, setRoot] = useState<string>(() => {
@@ -77,6 +92,7 @@ export default function App() {
     return [...STANDARD_TUNING];
   });
   const [chordFocus, setChordFocus] = useState<ChordFocus | null>(null);
+  const [snapshots, setSnapshots] = useState<FretboardSnapshot[]>([]);
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "light";
     const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -109,6 +125,27 @@ export default function App() {
   }, [scaleId]);
 
   const spelled = useMemo(() => spellScale(root, scale), [root, scale]);
+
+  const handleSnapshot = (activeCagedId: CagedShapeId | null) => {
+    const title = chordFocus
+      ? chordFocus.label
+      : `${spelled.root.text} ${spelled.scale.name}`;
+    setSnapshots((prev) => [
+      {
+        id: createSnapshotId(),
+        title,
+        spelled,
+        tuning: [...tuning],
+        chordFocus,
+        activeCagedId,
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleDeleteSnapshot = (id: string) => {
+    setSnapshots((prev) => prev.filter((snapshot) => snapshot.id !== id));
+  };
 
   return (
     <div className="app">
@@ -183,7 +220,42 @@ export default function App() {
           onResetTuning={() => setTuning([...STANDARD_TUNING])}
           chordFocus={chordFocus}
           onClearChordFocus={() => setChordFocus(null)}
+          onSnapshot={handleSnapshot}
         />
+        {snapshots.length > 0 && (
+          <section className="snapshotSection">
+            <div className="snapshotHeader">
+              <div className="snapshotTitle">Snapshots</div>
+              <div className="snapshotSubtitle">Saved fretboard views.</div>
+            </div>
+            <div className="snapshotList">
+              {snapshots.map((snapshot) => (
+                <Fretboard
+                  key={snapshot.id}
+                  spelled={snapshot.spelled}
+                  tuning={snapshot.tuning}
+                  onTuningChange={() => {}}
+                  onResetTuning={() => {}}
+                  chordFocus={snapshot.chordFocus}
+                  onClearChordFocus={() => {}}
+                  readOnly
+                  panelTitle={`Snapshot - ${snapshot.title}`}
+                  panelSubtitle={null}
+                  headerActions={
+                    <button
+                      type="button"
+                      className="snapshotDelete"
+                      onClick={() => handleDeleteSnapshot(snapshot.id)}
+                    >
+                      Delete
+                    </button>
+                  }
+                  initialCagedId={snapshot.activeCagedId}
+                />
+              ))}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );
