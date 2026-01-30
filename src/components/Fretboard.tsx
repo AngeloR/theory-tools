@@ -398,13 +398,26 @@ export function Fretboard({
         ? "Snapshot of the current fretboard view."
         : "Full-width map. Scroll if needed. In-scale notes are shown; chord focus uses CAGED voicings. Root is more saturated. Click a string label to retune it."
       : panelSubtitle;
+  const headerActionsNode =
+    headerActions ??
+    (!readOnly && onSnapshot ? (
+      <button
+        type="button"
+        className="snapshotButton"
+        onClick={() => onSnapshot(activeCagedId)}
+      >
+        Take snapshot
+      </button>
+    ) : null);
 
   return (
     <section className="panel fretboardPanel">
       <div className="panelHeader">
         <div className="panelHeaderRow">
           <div className="panelTitle">{panelTitle}</div>
-          {headerActions && <div className="panelHeaderActions">{headerActions}</div>}
+          {headerActionsNode && (
+            <div className="panelHeaderActions">{headerActionsNode}</div>
+          )}
         </div>
         {subtitleText !== null && <div className="panelSubtitle">{subtitleText}</div>}
         {chordFocus && (
