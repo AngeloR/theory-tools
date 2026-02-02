@@ -1,0 +1,12 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "guitar-chart",
+      "changelog-path": "CHANGELOG.md"
+    }
+  },
+  "pull-request-title-pattern": "chore${scope}: release${component} ${version}",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true
+}
