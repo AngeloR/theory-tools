@@ -449,8 +449,7 @@ export function CircleOfFifthsTool({
                       chordInfo ? degreeClass : "isEmpty",
                     ].join(" ")}
                   >
-                    {chordInfo ? chordInfo.chordText : ""}
-                    {chordInfo?.roman && <span className="cofKeyRoman mono">{chordInfo.roman}</span>}
+                    {chordInfo ? chordInfo.roman ?? chordInfo.degreeNumber : ""}
                   </span>
                 </button>
               );
@@ -488,8 +487,7 @@ export function CircleOfFifthsTool({
                       chordInfo ? degreeClass : "isEmpty",
                     ].join(" ")}
                   >
-                    {chordInfo ? chordInfo.chordText : ""}
-                    {chordInfo?.roman && <span className="cofKeyRoman mono">{chordInfo.roman}</span>}
+                    {chordInfo ? chordInfo.roman ?? chordInfo.degreeNumber : ""}
                   </span>
                 </button>
               );
@@ -527,8 +525,7 @@ export function CircleOfFifthsTool({
                       chordInfo ? degreeClass : "isEmpty",
                     ].join(" ")}
                   >
-                    {chordInfo ? chordInfo.chordText : ""}
-                    {chordInfo?.roman && <span className="cofKeyRoman mono">{chordInfo.roman}</span>}
+                    {chordInfo ? chordInfo.roman ?? chordInfo.degreeNumber : ""}
                   </span>
                 </button>
               );
