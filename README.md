@@ -1,15 +1,13 @@
-# Jazz Fretboard Trainer
+# Guitar Theory Tools
 
-This project is a **jazz-theory-driven guitar fretboard trainer** designed to teach musicians how to think, name, and visualize scales correctly in a real ensemble context.
+This project is a **guitar-focused theory toolkit** for visualizing scales, modes, chords, and the circle of fifths on the fretboard. It emphasizes correct spelling and practical context so you can communicate clearly with other musicians and apply theory in real playing situations.
 
 The app prioritizes:
 
 - Proper diatonic spelling
 - Scale-degree awareness
 - Full-neck visualization
-- Communication-ready theory (for playing with piano, bass, and horns)
-
-This is **not** a pattern-memorization or CAGED-based tool.
+- Clear key, mode, and chord relationships
 
 ## Documents
 
