@@ -476,8 +476,8 @@ select {
 /* Circle of fifths tool */
 .cofLayout {
   display: grid;
-  grid-template-columns: minmax(320px, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(360px, 1.1fr) minmax(280px, 0.9fr);
+  gap: 16px;
   align-items: start;
 }
 
@@ -486,6 +486,12 @@ select {
   display: grid;
   gap: 10px;
   justify-items: center;
+}
+
+.cofRail {
+  display: grid;
+  gap: 16px;
+  align-content: start;
 }
 
 .cofCircle {
@@ -682,7 +688,7 @@ select {
   margin-top: 2px;
 }
 .cofModesBlock {
-  margin-top: 14px;
+  margin-top: 4px;
   display: grid;
   gap: 10px;
 }
@@ -702,7 +708,7 @@ select {
   font-size: 14px;
 }
 .cofChordBlock {
-  margin-top: 16px;
+  margin-top: 4px;
   display: grid;
   gap: 12px;
 }
@@ -869,6 +875,33 @@ select {
   margin-top: 6px;
   font-size: 13px;
   font-weight: 800;
+}
+
+@media (max-width: 1180px) {
+  body {
+    min-width: 0;
+  }
+
+  .cofLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cofCircle {
+    width: min(460px, 92vw);
+    height: min(460px, 92vw);
+  }
+
+  .cofCircle::before {
+    inset: 36px;
+  }
+
+  .cofCircle::after {
+    inset: 98px;
+  }
+
+  .cofRingDim {
+    inset: 146px;
+  }
 }
 
 .degreeGrid {
