@@ -267,6 +267,20 @@ export default function App() {
         <div className="headerActions">
           <button
             type="button"
+            className="tabSwitchButton"
+            onClick={() =>
+              setActiveTab((prev) => (prev === "circle" ? "modes" : "circle"))
+            }
+            aria-label={
+              activeTab === "circle"
+                ? "Switch to Modes"
+                : "Switch to Circle of Fifths"
+            }
+          >
+            {activeTab === "circle" ? "Switch to Modes" : "Switch to Circle of Fifths"}
+          </button>
+          <button
+            type="button"
             className="themeToggle"
             onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
             aria-pressed={theme === "dark"}
@@ -278,23 +292,6 @@ export default function App() {
 
       <main className="main">
         <div className="tabShell">
-          <div className="tabSwitcher">
-            <button
-              type="button"
-              className="tabSwitchButton"
-              onClick={() =>
-                setActiveTab((prev) => (prev === "circle" ? "modes" : "circle"))
-              }
-              aria-label={
-                activeTab === "circle"
-                  ? "Switch to Modes"
-                  : "Switch to Circle of Fifths"
-              }
-            >
-              {activeTab === "circle" ? "Switch to Modes" : "Switch to Circle of Fifths"}
-            </button>
-          </div>
-
           <div className="tabPanel" hidden={activeTab !== "circle"}>
             <CircleOfFifthsTool
               chordFocus={chordFocus}

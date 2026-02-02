@@ -199,10 +199,6 @@ select {
   display: grid;
   gap: 14px;
 }
-.tabSwitcher {
-  display: flex;
-  justify-content: flex-end;
-}
 .tabSwitchButton {
   border-radius: 999px;
   border: 1px solid var(--border-strong);
