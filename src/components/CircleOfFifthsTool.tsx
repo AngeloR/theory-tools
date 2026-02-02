@@ -601,149 +601,149 @@ export function CircleOfFifthsTool({
             </div>
           </div>
         </div>
-      </div>
-
-        <div className="cofModesBlock">
-          <div className="cofSectionTitle">
-            Modes in key signature ({modeSignatureLabel})
-          </div>
-          <div className="modeStrip" role="list" aria-label="Modes in this key signature">
-          {orderedModes.map((m) => {
-            const modeRoot = normalizeNoteId(m.tonicText);
-            const isActive =
-              modeRoot === normalizedActiveRoot && m.scaleId === activeScaleId;
-            return (
-              <button
-                key={m.scaleId}
-                type="button"
-                role="listitem"
-                className={["modePill", isActive ? "isSelected" : ""].join(" ")}
-                onClick={() => onScaleSelect(modeRoot, m.scaleId)}
-                aria-pressed={isActive}
-              >
-                <div className="modePillTop mono">{m.tonicText}</div>
-                <div className="modePillMain">{m.modeName}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="cofChordBlock">
-        <div className="cofInfoHeader">
-          <div>
-            <div className="cofSectionTitle">Diatonic chords</div>
-            <div className="cofInfoSubtitle">
-              Triads + 7ths in {spelledKey.root.text} {keyMode}. Click a chord to
-              highlight it on the fretboard.
+        <div className="cofRail">
+          <div className="cofModesBlock">
+            <div className="cofSectionTitle">
+              Modes in key signature ({modeSignatureLabel})
             </div>
-          </div>
-          <div className="cofQualityLegend" aria-label="Chord quality legend">
-            <span className="cofQualityLabel">Quality</span>
-            {qualityLegend.map((q) => (
-              <span key={q} className={["qualityTag", `quality-${QUALITY_CATEGORY[q]}`].join(" ")}>
-                {QUALITY_LABELS[q]}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {showDiatonic ? (
-          <div className="chordMatrix" role="table" aria-label="Diatonic chords matrix">
-            <div className="chordMatrixHeader" role="row">
-              <div className="chordMatrixCorner" aria-hidden="true" />
-              {triads.map((c) => {
-                const degreeNumber =
-                  spelledKey.scale.degrees[c.degreeIndex]?.number ??
-                  c.degreeIndex + 1;
-                const isRoot = c.degreeIndex === 0;
-                return (
-                  <div
-                    key={`cof-header-${c.degreeIndex}-${c.chordText}`}
-                    className={[
-                      "chordMatrixHeaderCell",
-                      `degree-${degreeNumber}`,
-                      isRoot ? "isRoot" : "",
-                    ].join(" ")}
-                  >
-                    <div className="chordMatrixHeaderRoman mono">{c.roman ?? c.degreeText}</div>
-                    <div className="chordMatrixHeaderDegree">{c.degreeText}</div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="chordMatrixRow" role="row">
-              <div className="chordMatrixRowLabel">Triads</div>
-              {triads.map((c) => {
-                const degreeNumber =
-                  spelledKey.scale.degrees[c.degreeIndex]?.number ??
-                  c.degreeIndex + 1;
-                const isRoot = c.degreeIndex === 0;
-                const chordId = `triad-${keyMode}-${activeKeyId}-${c.degreeIndex}`;
-                const isSelected = chordFocus?.id === chordId;
+            <div className="modeStrip" role="list" aria-label="Modes in this key signature">
+              {orderedModes.map((m) => {
+                const modeRoot = normalizeNoteId(m.tonicText);
+                const isActive =
+                  modeRoot === normalizedActiveRoot && m.scaleId === activeScaleId;
                 return (
                   <button
-                    key={`cof-triad-${c.degreeIndex}-${c.chordText}`}
+                    key={m.scaleId}
                     type="button"
-                    role="cell"
-                    className={[
-                      "chordMatrixCell",
-                      `degree-${degreeNumber}`,
-                      isRoot ? "isRoot" : "",
-                      isSelected ? "isSelected" : "",
-                    ].join(" ")}
-                    title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
-                    onClick={() => handleChordSelect("triad", c)}
-                    aria-pressed={isSelected}
+                    role="listitem"
+                    className={["modePill", isActive ? "isSelected" : ""].join(" ")}
+                    onClick={() => onScaleSelect(modeRoot, m.scaleId)}
+                    aria-pressed={isActive}
                   >
-                    <div className="chordMatrixChord">{c.chordText}</div>
-                    <div className={["qualityTag", `quality-${QUALITY_CATEGORY[c.quality]}`].join(" ")}>
-                      {QUALITY_LABELS[c.quality]}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="chordMatrixRow" role="row">
-              <div className="chordMatrixRowLabel">7ths</div>
-              {sevenths.map((c) => {
-                const degreeNumber =
-                  spelledKey.scale.degrees[c.degreeIndex]?.number ??
-                  c.degreeIndex + 1;
-                const isRoot = c.degreeIndex === 0;
-                const chordId = `7th-${keyMode}-${activeKeyId}-${c.degreeIndex}`;
-                const isSelected = chordFocus?.id === chordId;
-                return (
-                  <button
-                    key={`cof-7th-${c.degreeIndex}-${c.chordText}`}
-                    type="button"
-                    role="cell"
-                    className={[
-                      "chordMatrixCell",
-                      `degree-${degreeNumber}`,
-                      isRoot ? "isRoot" : "",
-                      isSelected ? "isSelected" : "",
-                    ].join(" ")}
-                    title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
-                    onClick={() => handleChordSelect("7th", c)}
-                    aria-pressed={isSelected}
-                  >
-                    <div className="chordMatrixChord">{c.chordText}</div>
-                    <div className={["qualityTag", `quality-${QUALITY_CATEGORY[c.quality]}`].join(" ")}>
-                      {QUALITY_LABELS[c.quality]}
-                    </div>
+                    <div className="modePillTop mono">{m.tonicText}</div>
+                    <div className="modePillMain">{m.modeName}</div>
                   </button>
                 );
               })}
             </div>
           </div>
-        ) : (
-          <div className="cofEmpty">No diatonic chord set for this key.</div>
-        )}
-      </div>
 
+          <div className="cofChordBlock">
+            <div className="cofInfoHeader">
+              <div>
+                <div className="cofSectionTitle">Diatonic chords</div>
+                <div className="cofInfoSubtitle">
+                  Triads + 7ths in {spelledKey.root.text} {keyMode}. Click a chord to
+                  highlight it on the fretboard.
+                </div>
+              </div>
+              <div className="cofQualityLegend" aria-label="Chord quality legend">
+                <span className="cofQualityLabel">Quality</span>
+                {qualityLegend.map((q) => (
+                  <span key={q} className={["qualityTag", `quality-${QUALITY_CATEGORY[q]}`].join(" ")}>
+                    {QUALITY_LABELS[q]}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {showDiatonic ? (
+              <div className="chordMatrix" role="table" aria-label="Diatonic chords matrix">
+                <div className="chordMatrixHeader" role="row">
+                  <div className="chordMatrixCorner" aria-hidden="true" />
+                  {triads.map((c) => {
+                    const degreeNumber =
+                      spelledKey.scale.degrees[c.degreeIndex]?.number ??
+                      c.degreeIndex + 1;
+                    const isRoot = c.degreeIndex === 0;
+                    return (
+                      <div
+                        key={`cof-header-${c.degreeIndex}-${c.chordText}`}
+                        className={[
+                          "chordMatrixHeaderCell",
+                          `degree-${degreeNumber}`,
+                          isRoot ? "isRoot" : "",
+                        ].join(" ")}
+                      >
+                        <div className="chordMatrixHeaderRoman mono">{c.roman ?? c.degreeText}</div>
+                        <div className="chordMatrixHeaderDegree">{c.degreeText}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="chordMatrixRow" role="row">
+                  <div className="chordMatrixRowLabel">Triads</div>
+                  {triads.map((c) => {
+                    const degreeNumber =
+                      spelledKey.scale.degrees[c.degreeIndex]?.number ??
+                      c.degreeIndex + 1;
+                    const isRoot = c.degreeIndex === 0;
+                    const chordId = `triad-${keyMode}-${activeKeyId}-${c.degreeIndex}`;
+                    const isSelected = chordFocus?.id === chordId;
+                    return (
+                      <button
+                        key={`cof-triad-${c.degreeIndex}-${c.chordText}`}
+                        type="button"
+                        role="cell"
+                        className={[
+                          "chordMatrixCell",
+                          `degree-${degreeNumber}`,
+                          isRoot ? "isRoot" : "",
+                          isSelected ? "isSelected" : "",
+                        ].join(" ")}
+                        title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
+                        onClick={() => handleChordSelect("triad", c)}
+                        aria-pressed={isSelected}
+                      >
+                        <div className="chordMatrixChord">{c.chordText}</div>
+                        <div className={["qualityTag", `quality-${QUALITY_CATEGORY[c.quality]}`].join(" ")}>
+                          {QUALITY_LABELS[c.quality]}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="chordMatrixRow" role="row">
+                  <div className="chordMatrixRowLabel">7ths</div>
+                  {sevenths.map((c) => {
+                    const degreeNumber =
+                      spelledKey.scale.degrees[c.degreeIndex]?.number ??
+                      c.degreeIndex + 1;
+                    const isRoot = c.degreeIndex === 0;
+                    const chordId = `7th-${keyMode}-${activeKeyId}-${c.degreeIndex}`;
+                    const isSelected = chordFocus?.id === chordId;
+                    return (
+                      <button
+                        key={`cof-7th-${c.degreeIndex}-${c.chordText}`}
+                        type="button"
+                        role="cell"
+                        className={[
+                          "chordMatrixCell",
+                          `degree-${degreeNumber}`,
+                          isRoot ? "isRoot" : "",
+                          isSelected ? "isSelected" : "",
+                        ].join(" ")}
+                        title={`${c.degreeText}${c.roman ? ` (${c.roman})` : ""}`}
+                        onClick={() => handleChordSelect("7th", c)}
+                        aria-pressed={isSelected}
+                      >
+                        <div className="chordMatrixChord">{c.chordText}</div>
+                        <div className={["qualityTag", `quality-${QUALITY_CATEGORY[c.quality]}`].join(" ")}>
+                          {QUALITY_LABELS[c.quality]}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="cofEmpty">No diatonic chord set for this key.</div>
+            )}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

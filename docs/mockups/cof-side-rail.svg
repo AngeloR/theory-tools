@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720">
+  <rect width="1200" height="720" fill="#f3f0e7" />
+  <rect x="40" y="40" width="1120" height="640" rx="24" fill="#ffffff" stroke="#e3dfd6" />
+  <text x="72" y="92" font-family="Arial, sans-serif" font-size="18" fill="#1f1b16">Circle of Fifths</text>
+  <rect x="72" y="120" width="640" height="520" rx="20" fill="#fbf7ef" stroke="#e6e0d6" />
+  <circle cx="392" cy="380" r="190" fill="#f5efe6" stroke="#e6e0d6" />
+  <circle cx="392" cy="380" r="130" fill="none" stroke="#d7c7b4" stroke-dasharray="6 6" />
+  <circle cx="392" cy="380" r="80" fill="none" stroke="#c8b7a2" />
+  <rect x="744" y="120" width="380" height="210" rx="18" fill="#fbf7ef" stroke="#e6e0d6" />
+  <text x="768" y="154" font-family="Arial, sans-serif" font-size="14" fill="#5b5f6a">Modes</text>
+  <rect x="768" y="176" width="120" height="52" rx="12" fill="#f2eee7" stroke="#e0d9ce" />
+  <rect x="900" y="176" width="120" height="52" rx="12" fill="#f2eee7" stroke="#e0d9ce" />
+  <rect x="768" y="238" width="120" height="52" rx="12" fill="#f2eee7" stroke="#e0d9ce" />
+  <rect x="900" y="238" width="120" height="52" rx="12" fill="#f2eee7" stroke="#e0d9ce" />
+  <rect x="744" y="350" width="380" height="290" rx="18" fill="#fbf7ef" stroke="#e6e0d6" />
+  <text x="768" y="384" font-family="Arial, sans-serif" font-size="14" fill="#5b5f6a">Triads + 7ths</text>
+  <rect x="768" y="406" width="330" height="200" rx="12" fill="#f2eee7" stroke="#e0d9ce" />
+</svg>
