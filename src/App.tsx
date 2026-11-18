@@ -286,6 +286,19 @@ export default function App() {
     });
   };
 
+  const handleModesRootChange = (value: string) => {
+    const previousRoot = root;
+    setRoot(value);
+
+    // Pendo Track Event: a root note was chosen from the Modes Explorer Root select.
+    trackPendoEvent("modes_root_changed", {
+      previousRoot,
+      newRoot: value,
+      modeId: scaleId,
+      modeLabel: MODE_OPTIONS.find((mode) => mode.id === scaleId)?.label ?? scale.name,
+    });
+  };
+
   const handleDeleteSnapshot = (id: string) => {
     setSnapshots((prev) => prev.filter((snapshot) => snapshot.id !== id));
   };
@@ -346,7 +359,7 @@ export default function App() {
               modeId={scaleId}
               rootOptions={ROOT_OPTIONS}
               modes={MODE_OPTIONS}
-              onRootChange={setRoot}
+              onRootChange={handleModesRootChange}
               onModeChange={setScaleId}
             />
           </div>
