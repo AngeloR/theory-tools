@@ -5,6 +5,7 @@ import { CircleOfFifthsTool } from "./components/CircleOfFifthsTool";
 import { Fretboard, type CagedShapeId } from "./components/Fretboard";
 import type { ChordFocus } from "./lib/harmony";
 import { ModesTool, type ModeOption } from "./components/ModesTool";
+import { trackPendoEvent } from "./lib/pendo";
 
 const STANDARD_TUNING = ["E", "B", "G", "D", "A", "E"] as const;
 const THEME_STORAGE_KEY = "guitar-theme";
@@ -76,6 +77,10 @@ const createSnapshotId = () => {
 };
 
 const FALLBACK_SCALE = SCALES.find((s) => s.id === "major") ?? SCALES[0];
+
+const isStandardTuning = (value: readonly string[]) =>
+  value.length === STANDARD_TUNING.length &&
+  value.every((note, i) => note === STANDARD_TUNING[i]);
 
 const resolveScale = (id: string) => SCALES.find((s) => s.id === id) ?? FALLBACK_SCALE;
 
@@ -249,6 +254,36 @@ export default function App() {
       },
       ...prev,
     ]);
+
+    // Pendo Track Event: a new fretboard snapshot was saved.
+    trackPendoEvent("snapshot_saved", {
+      root,
+      scaleId,
+      scaleName: spelled.scale.name,
+      hasChordFocus: chordFocus !== null,
+      chordLabel: chordFocus?.label ?? "none",
+      chordKind: chordFocus?.kind ?? "none",
+      activeCagedId: activeCagedId ?? "none",
+      isStandardTuning: isStandardTuning(tuning),
+      tuning: [...tuning],
+      snapshotCount: snapshots.length + 1,
+    });
+  };
+
+  const handleTuningChange = (index: number, value: string) => {
+    const previousNote = tuning[index];
+    const nextTuning = tuning.map((note, i) => (i === index ? value : note));
+    setTuning((prev) => prev.map((note, i) => (i === index ? value : note)));
+
+    // Pendo Track Event: a string was retuned from its tuning select.
+    trackPendoEvent("fretboard_tuning_changed", {
+      stringIndex: index,
+      stringNumber: index + 1,
+      previousNote: previousNote ?? "",
+      newNote: value,
+      tuning: nextTuning,
+      isStandardTuning: isStandardTuning(nextTuning),
+    });
   };
 
   const handleDeleteSnapshot = (id: string) => {
@@ -319,9 +354,7 @@ export default function App() {
         <Fretboard
           spelled={spelled}
           tuning={tuning}
-          onTuningChange={(index, value) =>
-            setTuning((prev) => prev.map((note, i) => (i === index ? value : note)))
-          }
+          onTuningChange={handleTuningChange}
           onResetTuning={() => setTuning([...STANDARD_TUNING])}
           chordFocus={chordFocus}
           onClearChordFocus={() => setChordFocus(null)}
