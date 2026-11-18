@@ -8,6 +8,7 @@ import {
   type ChordFocus,
   type DiatonicChord,
 } from "../lib/harmony";
+import { trackPendoEvent } from "../lib/pendo";
 
 type CoFKey = {
   id: string; // root text usable by parseRoot/spellScale
@@ -383,6 +384,17 @@ export function CircleOfFifthsTool({
       kind,
       label: chord.chordText,
       tones,
+    });
+
+    // Pendo Track Event: a diatonic chord became the active chord focus.
+    trackPendoEvent("chord_focus_applied", {
+      chordId,
+      chordLabel: chord.chordText,
+      kind,
+      keyId: activeKeyId,
+      mode: keyMode,
+      degreeIndex: chord.degreeIndex,
+      roman: chord.roman ?? chord.degreeText,
     });
   };
 
